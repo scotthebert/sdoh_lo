@@ -1,0 +1,52 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+Notes: 
+
+- Need patient identifier
+- To control for multiple patient visits over time, likely need mixed effects 
+  model
+  - Otherwise, will have bias
+- Need to determine a method for looking at areas of need
+  - What are the independent variables for this?
+
+
+```{r}
+library(tidyverse)
+```
+
+```{r}
+# Load data
+sdoh <- read_csv("C:/Users/hebers/OneDrive - University Of Massachusetts Medical School/Documents/UMass Projects/sdoh-lo/SDOH Data - September 2024.csv")
+sdoh
+```
+
+```{r}
+# Transform data
+sdoh$current_gender <- as.factor(sdoh$current_gender)
+sdoh$gender_identity <- as.factor(sdoh$gender_identity)
+sdoh$race <- as.factor(sdoh$race)
+sdoh$ethnicity <- as.factor(sdoh$ethnicity)
+sdoh$pt_language <- as.factor(sdoh$pt_language)
+sdoh$city <- as.factor(sdoh$city)
+sdoh$zip <- as.factor(sdoh$zip)
+sdoh$sdoh_within_last_12_months <- as.factor(sdoh$sdoh_within_last_12_months)
+sdoh$screen_status <- as.factor(sdoh$screen_status)
+```
+
+```{r}
+# Simple model
+screen <- glm(sdoh_within_last_12_months ~ gender_identity + relevel(race, ref = "White"), family = "binomial", data = sdoh)
+summary(screen)
+```
+
+```{r}
+# Example of adjusted odds ratios and adjusted p-values
+print("Adjusted odds ratios")
+exp(coef(screen))
+print("Adjusted p-values")
+p.adjust(summary(screen)$coefficients[, 4], method = "bonferroni")
+```
+
