@@ -11,6 +11,7 @@ Notes:
   - Otherwise, will have bias
 - Need to determine a method for looking at areas of need
   - What are the independent variables for this?
+    - Likely demographic variables
 
 
 ```{r}
@@ -38,7 +39,7 @@ sdoh$screen_status <- as.factor(sdoh$screen_status)
 
 ```{r}
 # Simple model
-screen <- glm(sdoh_within_last_12_months ~ gender_identity + relevel(race, ref = "White"), family = "binomial", data = sdoh)
+screen <- glm(sdoh_within_last_12_months ~ relevel(gender_identity, ref = "Female") + relevel(race, ref = "White"), family = "binomial", data = sdoh)
 summary(screen)
 ```
 
