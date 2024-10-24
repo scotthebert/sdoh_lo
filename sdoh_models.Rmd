@@ -39,7 +39,7 @@ sdoh$screen_status <- as.factor(sdoh$screen_status)
 
 ```{r}
 # Simple model
-screen <- glm(sdoh_within_last_12_months ~ relevel(gender_identity, ref = "Female") + relevel(race, ref = "White"), family = "binomial", data = sdoh)
+screen <- glm(sdoh_within_last_12_months ~ current_gender + relevel(race, ref = "White"), family = "binomial", data = sdoh)
 summary(screen)
 ```
 
