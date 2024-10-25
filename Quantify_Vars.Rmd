@@ -21,18 +21,13 @@ When you click the **Knit** button a document will be generated that includes bo
 
 ```{r}
 library(tidyverse)
-```
-
-```{r}
 #Load data
 rm(list = ls())
 #load in data
 setwd("/Users/alo/Desktop/UMass/Capstone")
 SDOH_Data = read_csv("SDOH Data - 9_ 2024 workthrough.csv")
 # SDOH_Data = read_csv("SDOH Data - October 2024 - 0623 to 053124.csv")
-```
 
-```{r}
 # Adding patient numbers --------------------------------------------------
 pt_nbr=nrow(SDOH_Data) #number of patients, ID'ed by number of rows of data
 pt_ID = matrix(nrow = pt_nbr, ncol = 1)
@@ -276,6 +271,7 @@ ins_prop_tbl = as.data.frame(prop.table(ins_tbl))
 colnames(ins_prop_tbl) <- c("Prop")
 ins_prop_tbl_short = filter(ins_prop_tbl, Prop > 0.01) #if more than 1% of patients have a specific insurance, include in new table
 
+ins_prop_tbl
 ```
 
 ```{r} 
