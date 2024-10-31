@@ -21,12 +21,13 @@ When you click the **Knit** button a document will be generated that includes bo
 
 ```{r}
 library(tidyverse)
+library(dplyr)
 #Load data
 rm(list = ls())
 #load in data
 setwd("/Users/alo/Desktop/UMass/Capstone")
-SDOH_Data = read_csv("SDOH Data - 9_ 2024 workthrough.csv")
-# SDOH_Data = read_csv("SDOH Data - October 2024 - 0623 to 053124.csv")
+# SDOH_Data = read_csv("SDOH Data - 9_ 2024 workthrough.csv")
+SDOH_Data= read_csv("SDOH FINAL 01012023 to 05312024.csv")
 
 # Adding patient numbers --------------------------------------------------
 pt_nbr=nrow(SDOH_Data) #number of patients, ID'ed by number of rows of data
@@ -35,12 +36,16 @@ for (x in 1:pt_nbr){
   pt_ID[x] = paste("P_",x,sep = "")
 }
 SDOH_mtrx = cbind(pt_ID, SDOH_Data) #Master dataset with patient number included
+
+#Set date range of appointments between 06/01/2023 and 05/31/2024
+SDOH_mtrx$appt_date = as.Date(SDOH_mtrx$appt_date, format = "%m/%d/%y")
+SDOH_DS = SDOH_mtrx[SDOH_mtrx$appt_date >= as.Date("06/01/23", format = "%m/%d/%y"),] #DS with correct date range
 ```
 
 Quantifying Demographic
 ```{r}
 # Quantify Race --------------------------------------------------------------------
-race_tbl = table(SDOH_mtrx$race)
+race_tbl = table(SDOH_DS$race)
 #race_prop_tbl = prop.table(race_tbl)
 #colnames(race_prop_tbl) <- c("Freq")
 white_row = cbind(race_tbl['White'], row.names('White'))
@@ -59,29 +64,18 @@ hpi_row = cbind(hpi_ct, row.names('Hawaiian or Other Pacific Islander'))
 #Adjusted table per census
 census_tbl_rep = rbind(white_row, aa_row, ai_row, asian_row, hpi_row)
 colnames(census_tbl_rep) <- c('Patients')
-census_prop = prop.table(census_tbl_rep)
+census_prop = prop.table(census_tbl_rep)### report this as proportion of patients
 
 census_tbl_unrep = rbind(white_row, aa_row, ai_row, asian_row, hpi_row,unreported_race)
 colnames(census_tbl_unrep) <- c('Patients')
 census_prop_unrep = prop.table(census_tbl_unrep)
-pct_unrep = prop.table(census_tbl_unrep)['Unreported/Refused To Report', ]
+pct_unrep = prop.table(census_tbl_unrep)['Unreported/Refused To Report', ]### report this as proportion who did not report race
 
 library(plotly)
 race_chart <- data.frame("Race" = rownames(census_prop), census_prop)
 data <- race_chart[, c('Race', 'Patients')]
 
 #pie chart reported-----
-colors <- c('rgb(211,94,96)', 'rgb(128,133,133)', 'rgb(144,103,167)', 'rgb(171,104,87)', 'rgb(114,147,203)')
-fig <- plot_ly(data, labels = ~Race, values = ~Patients, type = 'pie')
-fig <- fig %>% layout(title = 'Race of patients FHCW primary care',
-                      xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
-                      yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
-
-fig
-
-#pie chart unreported-----
-# race_chart <- data.frame("Race" = rownames(census_prop_unrep), census_prop_unrep)
-# data <- race_chart[, c('Race', 'Patients')]
 # colors <- c('rgb(211,94,96)', 'rgb(128,133,133)', 'rgb(144,103,167)', 'rgb(171,104,87)', 'rgb(114,147,203)')
 # fig <- plot_ly(data, labels = ~Race, values = ~Patients, type = 'pie')
 # fig <- fig %>% layout(title = 'Race of patients FHCW primary care',
@@ -89,6 +83,18 @@ fig
 #                       yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
 # 
 # fig
+
+# pie chart unreported-----
+####unreported to be reported in final write up!!
+race_chart <- data.frame("Race" = rownames(census_prop_unrep), census_prop_unrep) #
+data <- race_chart[, c('Race', 'Patients')]
+colors <- c('rgb(211,94,96)', 'rgb(128,133,133)', 'rgb(144,103,167)', 'rgb(171,104,87)', 'rgb(114,147,203)')
+fig <- plot_ly(data, labels = ~Race, values = ~Patients, type = 'pie')
+fig <- fig %>% layout(title = 'Race of patients FHCW primary care',
+                      xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+                      yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+
+fig
 
 #bar chart----
 # fig <- plot_ly(
@@ -99,11 +105,16 @@ fig
 # )
 # 
 # fig
+
+census_prop #table of race at FHCW
+pct_unrep #proportion of patients who didn't report race at FHCW
+
 ```
+
 
 ```{r}
 # Ethnicity-------------------------------------------------------------------------
-eth_tbl = as.matrix(table(SDOH_mtrx$ethnicity))
+eth_tbl = as.matrix(table(SDOH_DS$ethnicity))
 eth_prop_tbl = prop.table(eth_tbl)
 colnames(eth_prop_tbl) <- c("Freq")
 
@@ -159,42 +170,57 @@ hisp_prop = prop.table(hisp_tbl)
 
 ```{r}
 # Gender Identity ---------------------------------------------------------
-gender_tbl = as.matrix(table(SDOH_mtrx$gender_identity))
+gender_tbl = as.matrix(table(SDOH_DS$gender_identity))
 gender_prop_tbl = prop.table(gender_tbl)
 colnames(gender_prop_tbl) <- c("Freq")
 
-female_row = cbind(gender_tbl['Female',], row.names('Female'))
-male_row = cbind(gender_tbl['Male',], row.names('Male'))
-undisclosed_g_ct = gender_tbl['Choose not to disclose',] + gender_tbl['NULL', ]
-undisclosed_g_row = cbind(undisclosed_g_ct, row.names('undisclosed/unreported'))
+# If unreported, see current gender. If current gender and gender identity null = unreported. ----
+unr_male = 0
+unr_female = 0
+unreported_gender = 0
+
+for (g in 1:nrow(SDOH_DS)) {
+  if (SDOH_DS$gender_identity[g] == "NULL"|SDOH_DS$gender_identity[g] == "Choose not to disclose" ) {
+    if(SDOH_DS$current_gender[g] == "M"){
+      unr_male = unr_male + 1 #males who did not respond to gender identity
+    }else if (SDOH_DS$current_gender[g] == "F"){
+      unr_female = unr_female + 1  #females who did not respond to gender identity
+    }else {
+      unreported_gender = unreported_gender + 1 #people who did not disclose gender identity or current gender
+    }
+  }
+}
+
+#
+female_ct = gender_tbl['Female',] + unr_female
+male_ct = gender_tbl['Male',] + unr_male
 
 #
 transgender_ct = gender_tbl['Female-to-Male (FTM)/Transgender Male/Trans Man',] + gender_tbl['Male-to-Female (MTF)/Transgender Female/Trans Woman', ]
-# transgender_row = cbind(as.matrix(transgender_ct, row.names('Transgender')))
 
 other_gender_ct = gender_tbl['Genderqueer, neither exclusively male nor female',] + gender_tbl['Additional gender category or other, please specify', ]
-other_gender_row = cbind(other_gender_ct, row.names('Other'))
 
 #Table of reported genders, including undisclosed
-gender_tbl_adj = rbind(male_row, female_row, transgender_ct, other_gender_row, undisclosed_g_row)
+gender_tbl_adj = rbind(male_ct, female_ct, transgender_ct, other_gender_row, unreported_gender)
 rownames(gender_tbl_adj) <- c("Male", "Female", "Transgender", "Other", "Undisclosed")
-gender_prop_adj = prop.table(gender_tbl_adj)
+gender_prop_adj = prop.table(gender_tbl_adj) ### report this 
 
-#Table of reported genders of only disclosed responses
-gender_tbl_adj_disc = rbind(male_row, female_row, transgender_row, other_gender_row)
-rownames(gender_tbl_adj_disc) <- c("Male", "Female", "Transgender", "Other")
-gender_prop_adj = prop.table(gender_tbl_adj_disc)
 ```
 
 ```{r}
 # language ----------------------------------------------------------------
-lang_tbl = as.matrix(table(SDOH_mtrx$pt_language))
+lang_tbl = as.matrix(table(SDOH_DS$pt_language))
 lang_prop_tbl = as.data.frame(prop.table(lang_tbl))
 colnames(lang_prop_tbl) <- c("Freq")
-ccat_lang = filter(lang_prop_tbl, Freq > 0.01) #if more than 1% of patients spoke language, include in new table
+other_lang = sum(lang_prop_tbl[lang_prop_tbl["Freq"] <= .02,] )
+
+#create new table
+ccat_lang = filter(lang_prop_tbl, Freq > 0.02) #if more than 1% of patients spoke language, include in new table
+lang_final = rbind(ccat_lang, other_lang)
+rownames(lang_final) = c(rownames(ccat_lang), "Other")
 
 library(plotly)
-lang_chart <- data.frame("Language" = rownames(ccat_lang), ccat_lang)
+lang_chart <- data.frame("Language" = rownames(lang_final), lang_final)
 data <- lang_chart[, c('Language', 'Freq')]
 
 #pie chart reported-----
@@ -222,15 +248,17 @@ unk_age_ct = 0
 birthyr_adj = 0
 
 for (zz in 1:pt_nbr){
-  # dt_fix = sprintf("%08s", SDOH_mtrx$pt_dob[zz])
+  # dt_fix = sprintf("%08s", SDOH_DS$pt_dob[zz])
   # birthdate = as.Date(dt_fix, format = "%m/%d/%y")
-  birthdate = as.Date(SDOH_mtrx$pt_dob[zz], format = "%m/%d/%y")
+  birthdate = as.Date(SDOH_DS$pt_dob[zz], format = "%m/%d/%y")
   birthyr = as.numeric(format(birthdate, "%Y"))
   
   #if birth year shows after 2025, adjust so it is 1900s
   if (birthyr > 2024){
-    birthyr_adj = birthyr - 100
-    
+    birthyr_adj = as.character(birthyr - 100)
+    mmdd = format(birthdate, "%m/%d")
+    birthdate_adj = paste(mmdd, birthyr_adj, sep = "/")
+    birthdate = as.Date(birthdate_adj,format = "%m/%d/%y")
   }
   
   age = age_calc(birthdate, units = "years")
@@ -256,16 +284,16 @@ for (zz in 1:pt_nbr){
 ```{r}
 ## Hometown --------------------------------------------
 # # City ----------------------------------------------------------------
-# city_tbl = as.matrix(table(SDOH_mtrx$city))
+# city_tbl = as.matrix(table(SDOH_DS$city))
 # city_prop_tbl = prop.table(city_tbl)
 # # ZipCode -------------------------------------------------------------
-# zip_tbl = as.matrix(table(SDOH_mtrx$zip))
+# zip_tbl = as.matrix(table(SDOH_DS$zip))
 # zip_prop_tbl = prop.table(city_tbl)
 ```
 
 ```{r}
 ##SDOH in last 12 months----------------------
-scrnd_tbl = as.matrix(table(SDOH_mtrx$sdoh_within_last_12_months))
+scrnd_tbl = as.matrix(table(SDOH_DS$sdoh_within_last_12_months))
 scrnd_prop_tbl = prop.table(scrnd_tbl)
 ```
 
@@ -275,7 +303,7 @@ notutd_scrn = 0
 curyr = 0
 yr_scrn_mtrx = matrix(nrow = pt_nbr, ncol = 1)
 for (ii in 1:pt_nbr){
-  yr_scrn = as.numeric(format(as.Date(SDOH_mtrx$last_sdoh_complete[ii], format = "%m/%d/%y"), "%Y"))
+  yr_scrn = as.numeric(format(as.Date(SDOH_DS$last_sdoh_complete[ii], format = "%m/%d/%y"), "%Y"))
   yr_scrn_mtrx[ii] = yr_scrn
   if (!is.na(yr_scrn)) {
     if (yr_scrn != 2023 & yr_scrn != 2024){
@@ -309,7 +337,7 @@ fig
 
 ```{r}
 #Insurance payer----
-ins_tbl = as.matrix(table(SDOH_mtrx$enc_payer))
+ins_tbl = as.matrix(table(SDOH_DS$enc_payer))
 ins_prop_tbl = as.data.frame(prop.table(ins_tbl))
 colnames(ins_prop_tbl) <- c("Prop")
 ins_prop_tbl_short = filter(ins_prop_tbl, Prop > 0.01) #if more than 1% of patients have a specific insurance, include in new table
@@ -319,7 +347,7 @@ ins_prop_tbl
 
 ```{r} 
 #Zip----
-zip_tbl = as.matrix(table(SDOH_mtrx$zip))
+zip_tbl = as.matrix(table(SDOH_DS$zip))
 zip_prop_tbl = as.data.frame(prop.table(zip_tbl))
 colnames(zip_prop_tbl) <- c("Prop")
 zip_prop_tbl_short = filter(zip_prop_tbl, Prop > 0.01) #if more than 1% of patients have a specific zip, include in new table
@@ -327,15 +355,15 @@ zip_prop_tbl_short = filter(zip_prop_tbl, Prop > 0.01) #if more than 1% of patie
 
 ```{r}
 #C3 screener responses
-c3_help = as.matrix(table(SDOH_mtrx$opt_help))
-c3_housing = as.matrix(table(SDOH_mtrx$txt_housing_situation))
-c3_livingissues_single = as.matrix(table(SDOH_mtrx$living))
-c3_livingissues_multi = as.matrix(table(SDOH_mtrx$txt_living_multi))
-c3_transportation = as.matrix(table(SDOH_mtrx$transportation))
-c3_transportation_multi = as.matrix(table(SDOH_mtrx$transportation_multi))
-c3_runoutmon4food = as.matrix(table(SDOH_mtrx$txt_run_out))
-c3_services = as.matrix(table(SDOH_mtrx$txt_services))
-c3_work = as.matrix(table(SDOH_mtrx$txt_work))
+c3_help = as.matrix(table(SDOH_DS$opt_help))
+c3_housing = as.matrix(table(SDOH_DS$txt_housing_situation))
+c3_livingissues_single = as.matrix(table(SDOH_DS$living))
+c3_livingissues_multi = as.matrix(table(SDOH_DS$txt_living_multi))
+c3_transportation = as.matrix(table(SDOH_DS$transportation))
+c3_transportation_multi = as.matrix(table(SDOH_DS$transportation_multi))
+c3_runoutmon4food = as.matrix(table(SDOH_DS$txt_run_out))
+c3_services = as.matrix(table(SDOH_DS$txt_services))
+c3_work = as.matrix(table(SDOH_DS$txt_work))
 ```
 
 ## Including Plots
