@@ -1777,48 +1777,180 @@ effects model
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyBMb2FkIGRhdGFcbiMgc2RvaCA8LSByZWFkX2NzdihcIkM6L1VzZXJzL2hlYmVycy9PbmVEcml2ZSAtIFVuaXZlcnNpdHkgT2YgTWFzc2FjaHVzZXR0cyBNZWRpY2FsIFNjaG9vbC9Eb2N1bWVudHMvVU1hc3MgUHJvamVjdHMvc2RvaC1sby9TRE9IIERhdGEgLSBTZXB0ZW1iZXIgMjAyNC5jc3ZcIilcbnNkb2ggPC0gcmVhZF9jc3YoXCIvVXNlcnMvYWxvL0Rlc2t0b3AvVU1hc3MvQ2Fwc3RvbmUvU0RPSCBEYXRhIC0gOV8gMjAyNCB3b3JrdGhyb3VnaC5jc3ZcIikgI0FsZXgncyBkaXJlY3RvcnkhXG5zZG9oXG5gYGAifQ== -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyBMb2FkIGRhdGFcbiMgc2RvaCA8LSByZWFkX2NzdihcIkM6L1VzZXJzL2hlYmVycy9PbmVEcml2ZSAtIFVuaXZlcnNpdHkgT2YgTWFzc2FjaHVzZXR0cyBNZWRpY2FsIFNjaG9vbC9Eb2N1bWVudHMvVU1hc3MgUHJvamVjdHMvc2RvaC1sby9TRE9IIERhdGEgLSBTZXB0ZW1iZXIgMjAyNC5jc3ZcIilcbnNkb2ggPC0gcmVhZF9jc3YoXCIvVXNlcnMvYWxvL0Rlc2t0b3AvVU1hc3MvQ2Fwc3RvbmUvU0RPSCBGSU5BTCAwMTAxMjAyMyB0byAwNTMxMjAyNC5jc3ZcIikgI0FsZXgncyBkaXJlY3RvcnkhXG5cbmBgYCJ9 -->
 <pre class="r"><code># Load data
 # sdoh &lt;- read_csv(&quot;C:/Users/hebers/OneDrive - University Of Massachusetts Medical School/Documents/UMass Projects/sdoh-lo/SDOH Data - September 2024.csv&quot;)
-sdoh &lt;- read_csv(&quot;/Users/alo/Desktop/UMass/Capstone/SDOH Data - 9_ 2024 workthrough.csv&quot;) #Alex&#39;s directory!
-sdoh</code></pre>
+sdoh &lt;- read_csv(&quot;/Users/alo/Desktop/UMass/Capstone/SDOH FINAL 01012023 to 05312024.csv&quot;) #Alex&#39;s directory!
+</code></pre>
 <!-- rnb-source-end -->
-<!-- rnb-chunk-end -->
-<!-- rnb-text-begin -->
-<!-- rnb-text-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyBUcmFuc2Zvcm0gZGF0YVxuc2RvaCRjdXJyZW50X2dlbmRlciA8LSBhcy5mYWN0b3Ioc2RvaCRjdXJyZW50X2dlbmRlcilcbmBgYCJ9 -->
-<pre class="r"><code># Transform data
-sdoh$current_gender &lt;- as.factor(sdoh$current_gender)</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiRXJyb3I6IG9iamVjdCAnc2RvaCcgbm90IGZvdW5kXG4ifQ== -->
-<pre><code>Error: object &#39;sdoh&#39; not found</code></pre>
+<!-- rnb-output-begin eyJkYXRhIjoiUm93czogODUxODEgQ29sdW1uczogMzTilIDilIAgQ29sdW1uIHNwZWNpZmljYXRpb24g4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSA4pSAXG5EZWxpbWl0ZXI6IFwiLFwiXG5jaHIgKDMyKTogYXBwdF9kYXRlLCBhcHB0X21vbnRoLCBwdF9kb2IsIGN1cnJlbnRfZ2VuZGVyLCBnZW5kZXJfaWRlbnRpdHksIHJhY2UsIGV0aG5pY2l0eSwgcHRfbGFuZ3VhZ2UsIGNpdHksIHBheWVyX2lkLCBlbmNfcGF5ZXIsLi4uXG5kYmwgICgyKTogemlwLCBjeV9hbm51YWxfc2NyZWVuX2hlbHBlclxu4oS5IFVzZSBgc3BlYygpYCB0byByZXRyaWV2ZSB0aGUgZnVsbCBjb2x1bW4gc3BlY2lmaWNhdGlvbiBmb3IgdGhpcyBkYXRhLlxu4oS5IFNwZWNpZnkgdGhlIGNvbHVtbiB0eXBlcyBvciBzZXQgYHNob3dfY29sX3R5cGVzID0gRkFMU0VgIHRvIHF1aWV0IHRoaXMgbWVzc2FnZS5cbiJ9 -->
+<pre><code>Rows: 85181 Columns: 34── Column specification ──────────────────────────────────────────────────────────────────────────────────────────────────────────────
+Delimiter: &quot;,&quot;
+chr (32): appt_date, appt_month, pt_dob, current_gender, gender_identity, race, ethnicity, pt_language, city, payer_id, enc_payer,...
+dbl  (2): zip, cy_annual_screen_helper
+ℹ Use `spec()` to retrieve the full column specification for this data.
+ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
 <!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyBTaW1wbGUgbW9kZWxcbnNjcmVlbiA8LSBnbG0oc2RvaF93aXRoaW5fbGFzdF8xMl9tb250aHMgfiByZWxldmVsKGdlbmRlcl9pZGVudGl0eSwgcmVmID0gXCJGZW1hbGVcIikgKyByZWxldmVsKHJhY2UsIHJlZiA9IFwiV2hpdGVcIiksIGZhbWlseSA9IFwiYmlub21pYWxcIiwgZGF0YSA9IHNkb2gpXG5zdW1tYXJ5KHNjcmVlbilcbmBgYCJ9 -->
-<pre class="r"><code># Simple model
-screen &lt;- glm(sdoh_within_last_12_months ~ relevel(gender_identity, ref = &quot;Female&quot;) + relevel(race, ref = &quot;White&quot;), family = &quot;binomial&quot;, data = sdoh)
-summary(screen)</code></pre>
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyBUcmFuc2Zvcm0gZGF0YVxuc2RvaCRjdXJyZW50X2dlbmRlciA8LSBhcy5mYWN0b3Ioc2RvaCRjdXJyZW50X2dlbmRlcilcbnNkb2gkZ2VuZGVyX2lkZW50aXR5IDwtIGFzLmZhY3RvcihzZG9oJGdlbmRlcl9pZGVudGl0eSlcbnNkb2gkcmFjZSA8LSBhcy5mYWN0b3Ioc2RvaCRyYWNlKVxuc2RvaCRldGhuaWNpdHkgPC0gYXMuZmFjdG9yKHNkb2gkZXRobmljaXR5KVxuc2RvaCRwdF9sYW5ndWFnZSA8LSBhcy5mYWN0b3Ioc2RvaCRwdF9sYW5ndWFnZSlcbnNkb2gkY2l0eSA8LSBhcy5mYWN0b3Ioc2RvaCRjaXR5KVxuc2RvaCR6aXAgPC0gYXMuZmFjdG9yKHNkb2gkemlwKVxuc2RvaCRzZG9oX3dpdGhpbl9sYXN0XzEyX21vbnRocyA8LSBhcy5mYWN0b3Ioc2RvaCRzZG9oX3dpdGhpbl9sYXN0XzEyX21vbnRocylcbnNkb2gkc2NyZWVuX3N0YXR1cyA8LSBhcy5mYWN0b3Ioc2RvaCRzY3JlZW5fc3RhdHVzKVxuYGBgIn0= -->
+<pre class="r"><code># Transform data
+sdoh$current_gender &lt;- as.factor(sdoh$current_gender)
+sdoh$gender_identity &lt;- as.factor(sdoh$gender_identity)
+sdoh$race &lt;- as.factor(sdoh$race)
+sdoh$ethnicity &lt;- as.factor(sdoh$ethnicity)
+sdoh$pt_language &lt;- as.factor(sdoh$pt_language)
+sdoh$city &lt;- as.factor(sdoh$city)
+sdoh$zip &lt;- as.factor(sdoh$zip)
+sdoh$sdoh_within_last_12_months &lt;- as.factor(sdoh$sdoh_within_last_12_months)
+sdoh$screen_status &lt;- as.factor(sdoh$screen_status)</code></pre>
 <!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyBFeGFtcGxlIG9mIGFkanVzdGVkIG9kZHMgcmF0aW9zIGFuZCBhZGp1c3RlZCBwLXZhbHVlc1xucHJpbnQoXCJBZGp1c3RlZCBvZGRzIHJhdGlvc1wiKVxuZXhwKGNvZWYoc2NyZWVuKSlcbnByaW50KFwiQWRqdXN0ZWQgcC12YWx1ZXNcIilcbnAuYWRqdXN0KHN1bW1hcnkoc2NyZWVuKSRjb2VmZmljaWVudHNbLCA0XSwgbWV0aG9kID0gXCJib25mZXJyb25pXCIpXG5gYGAifQ== -->
-<pre class="r"><code># Example of adjusted odds ratios and adjusted p-values
-print(&quot;Adjusted odds ratios&quot;)
-exp(coef(screen))
-print(&quot;Adjusted p-values&quot;)
-p.adjust(summary(screen)$coefficients[, 4], method = &quot;bonferroni&quot;)</code></pre>
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyBTaW1wbGUgbW9kZWxcbnNjcmVlbiA8LSBnbG0oc2RvaF93aXRoaW5fbGFzdF8xMl9tb250aHMgfiBjdXJyZW50X2dlbmRlciArIHJlbGV2ZWwocmFjZSwgcmVmID0gXCJXaGl0ZVwiKSwgZmFtaWx5ID0gXCJiaW5vbWlhbFwiLCBkYXRhID0gc2RvaClcbnN1bW1hcnkoc2NyZWVuKVxuYGBgIn0= -->
+<pre class="r"><code># Simple model
+screen &lt;- glm(sdoh_within_last_12_months ~ current_gender + relevel(race, ref = &quot;White&quot;), family = &quot;binomial&quot;, data = sdoh)
+summary(screen)</code></pre>
 <!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiXG5DYWxsOlxuZ2xtKGZvcm11bGEgPSBzZG9oX3dpdGhpbl9sYXN0XzEyX21vbnRocyB+IGN1cnJlbnRfZ2VuZGVyICsgcmVsZXZlbChyYWNlLCBcbiAgICByZWYgPSBcIldoaXRlXCIpLCBmYW1pbHkgPSBcImJpbm9taWFsXCIsIGRhdGEgPSBzZG9oKVxuXG5Db2VmZmljaWVudHM6XG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIEVzdGltYXRlIFN0ZC4gRXJyb3IgeiB2YWx1ZSBQcig+fHp8KSAgICBcbihJbnRlcmNlcHQpICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDAuMzI3NzQgICAgMC4wMTMxNCAgMjQuOTM1ICA8IDJlLTE2ICoqKlxuY3VycmVudF9nZW5kZXJNICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAtMC4zOTQwMCAgICAwLjAxNDE4IC0yNy43NzggIDwgMmUtMTYgKioqXG5jdXJyZW50X2dlbmRlck5VTEwgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAwLjI0MTg0ICAgIDAuMzQ1NjAgICAwLjcwMCAwLjQ4NDA2NiAgICBcbmN1cnJlbnRfZ2VuZGVyVU4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgLTAuMjMwOTUgICAgMC4yNjc3NCAgLTAuODYzIDAuMzg4MzU4ICAgIFxuY3VycmVudF9nZW5kZXJVTksgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIC0xMS44OTM3OSAgIDgwLjQxMTcyICAtMC4xNDggMC44ODI0MTMgICAgXG5yZWxldmVsKHJhY2UsIHJlZiA9IFwiV2hpdGVcIilBbWVyaWNhbiBJbmRpYW4gb3IgQWxhc2thIE5hdGl2ZSAgIDAuMzAyMTMgICAgMC4wOTA3NyAgIDMuMzI5IDAuMDAwODczICoqKlxucmVsZXZlbChyYWNlLCByZWYgPSBcIldoaXRlXCIpQXNpYW4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAwLjE1NDkzICAgIDAuMDMzNzAgICA0LjU5NyA0LjI5ZS0wNiAqKipcbnJlbGV2ZWwocmFjZSwgcmVmID0gXCJXaGl0ZVwiKUFzaWFuIEluZGlhbiAgICAgICAgICAgICAgICAgICAgICAtMS41NTc5NCAgICAwLjM5NjYxICAtMy45MjggOC41NmUtMDUgKioqXG5yZWxldmVsKHJhY2UsIHJlZiA9IFwiV2hpdGVcIilCbGFjayBvciBBZnJpY2FuIEFtZXJpY2FuICAgICAgICAgLTAuMTk1OTggICAgMC4wMTk5OSAgLTkuODA0ICA8IDJlLTE2ICoqKlxucmVsZXZlbChyYWNlLCByZWYgPSBcIldoaXRlXCIpQ2hpbmVzZSAgICAgICAgICAgICAgICAgICAgICAgICAgLTExLjU5OTg3ICAgOTcuODAxNjUgIC0wLjExOSAwLjkwNTU4NyAgICBcbnJlbGV2ZWwocmFjZSwgcmVmID0gXCJXaGl0ZVwiKUZpbGlwaW5vICAgICAgICAgICAgICAgICAgICAgICAgIC0xMS43NjMxNiAgMTEyLjgyODcxICAtMC4xMDQgMC45MTY5NjYgICAgXG5yZWxldmVsKHJhY2UsIHJlZiA9IFwiV2hpdGVcIilKYXBhbmVzZSAgICAgICAgICAgICAgICAgICAgICAgICAgMTEuMjM4MzEgIDEzOS4yNzcxOCAgIDAuMDgxIDAuOTM1Njg4ICAgIFxucmVsZXZlbChyYWNlLCByZWYgPSBcIldoaXRlXCIpTmF0aXZlIEhhd2FpaWFuICAgICAgICAgICAgICAgICAgIC0xLjA0NjQxICAgIDAuMzYxMTkgIC0yLjg5NyAwLjAwMzc2NiAqKiBcbnJlbGV2ZWwocmFjZSwgcmVmID0gXCJXaGl0ZVwiKU90aGVyIEFzaWFuICAgICAgICAgICAgICAgICAgICAgICAtMC42NzQ4NCAgICAwLjE3NTAzICAtMy44NTYgMC4wMDAxMTUgKioqXG5yZWxldmVsKHJhY2UsIHJlZiA9IFwiV2hpdGVcIilPdGhlciBQYWNpZmljIElzbGFuZGVyICAgICAgICAgICAgLTAuMDIxNzUgICAgMC4wNTYwMSAgLTAuMzg4IDAuNjk3ODMxICAgIFxucmVsZXZlbChyYWNlLCByZWYgPSBcIldoaXRlXCIpVW5yZXBvcnRlZC9SZWZ1c2VkIFRvIFJlcG9ydCAgICAgIC0wLjE5Mjc4ICAgIDAuMDE2MDcgLTExLjk5OCAgPCAyZS0xNiAqKipcbi0tLVxuU2lnbmlmLiBjb2RlczogIDAg4oCYKioq4oCZIDAuMDAxIOKAmCoq4oCZIDAuMDEg4oCYKuKAmSAwLjA1IOKAmC7igJkgMC4xIOKAmCDigJkgMVxuXG4oRGlzcGVyc2lvbiBwYXJhbWV0ZXIgZm9yIGJpbm9taWFsIGZhbWlseSB0YWtlbiB0byBiZSAxKVxuXG4gICAgTnVsbCBkZXZpYW5jZTogMTE3OTg3ICBvbiA4NTE4MCAgZGVncmVlcyBvZiBmcmVlZG9tXG5SZXNpZHVhbCBkZXZpYW5jZTogMTE2ODkxICBvbiA4NTE2NSAgZGVncmVlcyBvZiBmcmVlZG9tXG5BSUM6IDExNjkyM1xuXG5OdW1iZXIgb2YgRmlzaGVyIFNjb3JpbmcgaXRlcmF0aW9uczogMTBcbiJ9 -->
+<pre><code>
+Call:
+glm(formula = sdoh_within_last_12_months ~ current_gender + relevel(race, 
+    ref = &quot;White&quot;), family = &quot;binomial&quot;, data = sdoh)
+
+Coefficients:
+                                                              Estimate Std. Error z value Pr(&gt;|z|)    
+(Intercept)                                                    0.32774    0.01314  24.935  &lt; 2e-16 ***
+current_genderM                                               -0.39400    0.01418 -27.778  &lt; 2e-16 ***
+current_genderNULL                                             0.24184    0.34560   0.700 0.484066    
+current_genderUN                                              -0.23095    0.26774  -0.863 0.388358    
+current_genderUNK                                            -11.89379   80.41172  -0.148 0.882413    
+relevel(race, ref = &quot;White&quot;)American Indian or Alaska Native   0.30213    0.09077   3.329 0.000873 ***
+relevel(race, ref = &quot;White&quot;)Asian                              0.15493    0.03370   4.597 4.29e-06 ***
+relevel(race, ref = &quot;White&quot;)Asian Indian                      -1.55794    0.39661  -3.928 8.56e-05 ***
+relevel(race, ref = &quot;White&quot;)Black or African American         -0.19598    0.01999  -9.804  &lt; 2e-16 ***
+relevel(race, ref = &quot;White&quot;)Chinese                          -11.59987   97.80165  -0.119 0.905587    
+relevel(race, ref = &quot;White&quot;)Filipino                         -11.76316  112.82871  -0.104 0.916966    
+relevel(race, ref = &quot;White&quot;)Japanese                          11.23831  139.27718   0.081 0.935688    
+relevel(race, ref = &quot;White&quot;)Native Hawaiian                   -1.04641    0.36119  -2.897 0.003766 ** 
+relevel(race, ref = &quot;White&quot;)Other Asian                       -0.67484    0.17503  -3.856 0.000115 ***
+relevel(race, ref = &quot;White&quot;)Other Pacific Islander            -0.02175    0.05601  -0.388 0.697831    
+relevel(race, ref = &quot;White&quot;)Unreported/Refused To Report      -0.19278    0.01607 -11.998  &lt; 2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 117987  on 85180  degrees of freedom
+Residual deviance: 116891  on 85165  degrees of freedom
+AIC: 116923
+
+Number of Fisher Scoring iterations: 10</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyBFeGFtcGxlIG9mIGFkanVzdGVkIG9kZHMgcmF0aW9zIGFuZCBhZGp1c3RlZCBwLXZhbHVlc1xucHJpbnQoXCJBZGp1c3RlZCBvZGRzIHJhdGlvc1wiKVxuYGBgIn0= -->
+<pre class="r"><code># Example of adjusted odds ratios and adjusted p-values
+print(&quot;Adjusted odds ratios&quot;)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiWzFdIFwiQWRqdXN0ZWQgb2RkcyByYXRpb3NcIlxuIn0= -->
+<pre><code>[1] &quot;Adjusted odds ratios&quot;</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZXhwKGNvZWYoc2NyZWVuKSlcbmBgYCJ9 -->
+<pre class="r"><code>exp(coef(screen))</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAoSW50ZXJjZXB0KSBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAxLjg3NDIwNGUrMDAgXG5yZWxldmVsKGdlbmRlcl9pZGVudGl0eSwgcmVmID0gXCJGZW1hbGVcIilBZGRpdGlvbmFsIGdlbmRlciBjYXRlZ29yeSBvciBvdGhlciwgcGxlYXNlIHNwZWNpZnkgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgMS40Njk1OTZlKzAwIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICByZWxldmVsKGdlbmRlcl9pZGVudGl0eSwgcmVmID0gXCJGZW1hbGVcIilDaG9vc2Ugbm90IHRvIGRpc2Nsb3NlIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDcuNzE1MjgyZS0wMSBcbiAgICByZWxldmVsKGdlbmRlcl9pZGVudGl0eSwgcmVmID0gXCJGZW1hbGVcIilGZW1hbGUtdG8tTWFsZSAoRlRNKS9UcmFuc2dlbmRlciBNYWxlL1RyYW5zIE1hbiBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAxLjEzNTczOGUrMDAgXG4gICByZWxldmVsKGdlbmRlcl9pZGVudGl0eSwgcmVmID0gXCJGZW1hbGVcIilHZW5kZXJxdWVlciwgbmVpdGhlciBleGNsdXNpdmVseSBtYWxlIG5vciBmZW1hbGUgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgOC4zODIzMDRlLTAxIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICByZWxldmVsKGdlbmRlcl9pZGVudGl0eSwgcmVmID0gXCJGZW1hbGVcIilNYWxlIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDYuNjM3MTAwZS0wMSBcbnJlbGV2ZWwoZ2VuZGVyX2lkZW50aXR5LCByZWYgPSBcIkZlbWFsZVwiKU1hbGUtdG8tRmVtYWxlIChNVEYpL1RyYW5zZ2VuZGVyIEZlbWFsZS9UcmFucyBXb21hbiBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA0LjQxOTMxN2UtMDEgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHJlbGV2ZWwoZ2VuZGVyX2lkZW50aXR5LCByZWYgPSBcIkZlbWFsZVwiKU5VTEwgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgNy40Njg0MDFlLTAxIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHJlbGV2ZWwocmFjZSwgcmVmID0gXCJXaGl0ZVwiKUFtZXJpY2FuIEluZGlhbiBvciBBbGFza2EgTmF0aXZlIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDEuMjkxOTg5ZSswMCBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICByZWxldmVsKHJhY2UsIHJlZiA9IFwiV2hpdGVcIilBc2lhbiBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAxLjE0NTY2M2UrMDAgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICByZWxldmVsKHJhY2UsIHJlZiA9IFwiV2hpdGVcIilBc2lhbiBJbmRpYW4gXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgNy4xNTI5MTZlLTAxIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICByZWxldmVsKHJhY2UsIHJlZiA9IFwiV2hpdGVcIilCbGFjayBvciBBZnJpY2FuIEFtZXJpY2FuIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDguMjQ3MTc0ZS0wMSBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgcmVsZXZlbChyYWNlLCByZWYgPSBcIldoaXRlXCIpQ2hpbmVzZSBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA0LjU3ODQ3MmUtMDUgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICByZWxldmVsKHJhY2UsIHJlZiA9IFwiV2hpdGVcIilOYXRpdmUgSGF3YWlpYW4gXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgMi42NDAzMjZlLTAxIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHJlbGV2ZWwocmFjZSwgcmVmID0gXCJXaGl0ZVwiKU90aGVyIEFzaWFuIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDQuNjE5NTAwZSswMCBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgcmVsZXZlbChyYWNlLCByZWYgPSBcIldoaXRlXCIpT3RoZXIgUGFjaWZpYyBJc2xhbmRlciBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA5LjI4NzgxM2UtMDEgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHJlbGV2ZWwocmFjZSwgcmVmID0gXCJXaGl0ZVwiKVVucmVwb3J0ZWQvUmVmdXNlZCBUbyBSZXBvcnQgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgOC4zNzIxMjNlLTAxIFxuIn0= -->
+<pre><code>                                                                                (Intercept) 
+                                                                               1.874204e+00 
+relevel(gender_identity, ref = &quot;Female&quot;)Additional gender category or other, please specify 
+                                                                               1.469596e+00 
+                             relevel(gender_identity, ref = &quot;Female&quot;)Choose not to disclose 
+                                                                               7.715282e-01 
+    relevel(gender_identity, ref = &quot;Female&quot;)Female-to-Male (FTM)/Transgender Male/Trans Man 
+                                                                               1.135738e+00 
+   relevel(gender_identity, ref = &quot;Female&quot;)Genderqueer, neither exclusively male nor female 
+                                                                               8.382304e-01 
+                                               relevel(gender_identity, ref = &quot;Female&quot;)Male 
+                                                                               6.637100e-01 
+relevel(gender_identity, ref = &quot;Female&quot;)Male-to-Female (MTF)/Transgender Female/Trans Woman 
+                                                                               4.419317e-01 
+                                               relevel(gender_identity, ref = &quot;Female&quot;)NULL 
+                                                                               7.468401e-01 
+                               relevel(race, ref = &quot;White&quot;)American Indian or Alaska Native 
+                                                                               1.291989e+00 
+                                                          relevel(race, ref = &quot;White&quot;)Asian 
+                                                                               1.145663e+00 
+                                                   relevel(race, ref = &quot;White&quot;)Asian Indian 
+                                                                               7.152916e-01 
+                                      relevel(race, ref = &quot;White&quot;)Black or African American 
+                                                                               8.247174e-01 
+                                                        relevel(race, ref = &quot;White&quot;)Chinese 
+                                                                               4.578472e-05 
+                                                relevel(race, ref = &quot;White&quot;)Native Hawaiian 
+                                                                               2.640326e-01 
+                                                    relevel(race, ref = &quot;White&quot;)Other Asian 
+                                                                               4.619500e+00 
+                                         relevel(race, ref = &quot;White&quot;)Other Pacific Islander 
+                                                                               9.287813e-01 
+                                   relevel(race, ref = &quot;White&quot;)Unreported/Refused To Report 
+                                                                               8.372123e-01 </code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucHJpbnQoXCJBZGp1c3RlZCBwLXZhbHVlc1wiKVxuYGBgIn0= -->
+<pre class="r"><code>print(&quot;Adjusted p-values&quot;)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiWzFdIFwiQWRqdXN0ZWQgcC12YWx1ZXNcIlxuIn0= -->
+<pre><code>[1] &quot;Adjusted p-values&quot;</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucC5hZGp1c3Qoc3VtbWFyeShzY3JlZW4pJGNvZWZmaWNpZW50c1ssIDRdLCBtZXRob2QgPSBcImJvbmZlcnJvbmlcIilcbmBgYCJ9 -->
+<pre class="r"><code>p.adjust(summary(screen)$coefficients[, 4], method = &quot;bonferroni&quot;)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAoSW50ZXJjZXB0KSBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDEuODg2NjkyZS0xODcgXG5yZWxldmVsKGdlbmRlcl9pZGVudGl0eSwgcmVmID0gXCJGZW1hbGVcIilBZGRpdGlvbmFsIGdlbmRlciBjYXRlZ29yeSBvciBvdGhlciwgcGxlYXNlIHNwZWNpZnkgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgMS4wMDAwMDBlKzAwIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICByZWxldmVsKGdlbmRlcl9pZGVudGl0eSwgcmVmID0gXCJGZW1hbGVcIilDaG9vc2Ugbm90IHRvIGRpc2Nsb3NlIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDEuMDAwMDAwZSswMCBcbiAgICByZWxldmVsKGdlbmRlcl9pZGVudGl0eSwgcmVmID0gXCJGZW1hbGVcIilGZW1hbGUtdG8tTWFsZSAoRlRNKS9UcmFuc2dlbmRlciBNYWxlL1RyYW5zIE1hbiBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAxLjAwMDAwMGUrMDAgXG4gICByZWxldmVsKGdlbmRlcl9pZGVudGl0eSwgcmVmID0gXCJGZW1hbGVcIilHZW5kZXJxdWVlciwgbmVpdGhlciBleGNsdXNpdmVseSBtYWxlIG5vciBmZW1hbGUgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgMS4wMDAwMDBlKzAwIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICByZWxldmVsKGdlbmRlcl9pZGVudGl0eSwgcmVmID0gXCJGZW1hbGVcIilNYWxlIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDIuODM3MjA3ZS01MiBcbnJlbGV2ZWwoZ2VuZGVyX2lkZW50aXR5LCByZWYgPSBcIkZlbWFsZVwiKU1hbGUtdG8tRmVtYWxlIChNVEYpL1RyYW5zZ2VuZGVyIEZlbWFsZS9UcmFucyBXb21hbiBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAzLjIxMjQ5M2UtMDMgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHJlbGV2ZWwoZ2VuZGVyX2lkZW50aXR5LCByZWYgPSBcIkZlbWFsZVwiKU5VTEwgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgNy41Nzg0NzNlLTQyIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHJlbGV2ZWwocmFjZSwgcmVmID0gXCJXaGl0ZVwiKUFtZXJpY2FuIEluZGlhbiBvciBBbGFza2EgTmF0aXZlIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDQuODY0Mjc4ZS0wMSBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICByZWxldmVsKHJhY2UsIHJlZiA9IFwiV2hpdGVcIilBc2lhbiBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAzLjE1NDQyMGUtMDIgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICByZWxldmVsKHJhY2UsIHJlZiA9IFwiV2hpdGVcIilBc2lhbiBJbmRpYW4gXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgMS4wMDAwMDBlKzAwIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICByZWxldmVsKHJhY2UsIHJlZiA9IFwiV2hpdGVcIilCbGFjayBvciBBZnJpY2FuIEFtZXJpY2FuIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDQuMTkzMzc3ZS0xMiBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgcmVsZXZlbChyYWNlLCByZWYgPSBcIldoaXRlXCIpQ2hpbmVzZSBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAxLjAwMDAwMGUrMDAgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICByZWxldmVsKHJhY2UsIHJlZiA9IFwiV2hpdGVcIilOYXRpdmUgSGF3YWlpYW4gXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgMi41NTIwNjRlLTAyIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHJlbGV2ZWwocmFjZSwgcmVmID0gXCJXaGl0ZVwiKU90aGVyIEFzaWFuIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDcuNTUwNTk1ZS0wMSBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgcmVsZXZlbChyYWNlLCByZWYgPSBcIldoaXRlXCIpT3RoZXIgUGFjaWZpYyBJc2xhbmRlciBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAxLjAwMDAwMGUrMDAgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHJlbGV2ZWwocmFjZSwgcmVmID0gXCJXaGl0ZVwiKVVucmVwb3J0ZWQvUmVmdXNlZCBUbyBSZXBvcnQgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgNS4wNDMwOTllLTE2IFxuIn0= -->
+<pre><code>                                                                                (Intercept) 
+                                                                              1.886692e-187 
+relevel(gender_identity, ref = &quot;Female&quot;)Additional gender category or other, please specify 
+                                                                               1.000000e+00 
+                             relevel(gender_identity, ref = &quot;Female&quot;)Choose not to disclose 
+                                                                               1.000000e+00 
+    relevel(gender_identity, ref = &quot;Female&quot;)Female-to-Male (FTM)/Transgender Male/Trans Man 
+                                                                               1.000000e+00 
+   relevel(gender_identity, ref = &quot;Female&quot;)Genderqueer, neither exclusively male nor female 
+                                                                               1.000000e+00 
+                                               relevel(gender_identity, ref = &quot;Female&quot;)Male 
+                                                                               2.837207e-52 
+relevel(gender_identity, ref = &quot;Female&quot;)Male-to-Female (MTF)/Transgender Female/Trans Woman 
+                                                                               3.212493e-03 
+                                               relevel(gender_identity, ref = &quot;Female&quot;)NULL 
+                                                                               7.578473e-42 
+                               relevel(race, ref = &quot;White&quot;)American Indian or Alaska Native 
+                                                                               4.864278e-01 
+                                                          relevel(race, ref = &quot;White&quot;)Asian 
+                                                                               3.154420e-02 
+                                                   relevel(race, ref = &quot;White&quot;)Asian Indian 
+                                                                               1.000000e+00 
+                                      relevel(race, ref = &quot;White&quot;)Black or African American 
+                                                                               4.193377e-12 
+                                                        relevel(race, ref = &quot;White&quot;)Chinese 
+                                                                               1.000000e+00 
+                                                relevel(race, ref = &quot;White&quot;)Native Hawaiian 
+                                                                               2.552064e-02 
+                                                    relevel(race, ref = &quot;White&quot;)Other Asian 
+                                                                               7.550595e-01 
+                                         relevel(race, ref = &quot;White&quot;)Other Pacific Islander 
+                                                                               1.000000e+00 
+                                   relevel(race, ref = &quot;White&quot;)Unreported/Refused To Report 
+                                                                               5.043099e-16 </code></pre>
+<!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 
-<div id="rmd-source-code">LS0tCnRpdGxlOiAiUiBOb3RlYm9vayIKb3V0cHV0OiBodG1sX25vdGVib29rCi0tLQoKTm90ZXM6IAoKLSBOZWVkIHBhdGllbnQgaWRlbnRpZmllcgotIFRvIGNvbnRyb2wgZm9yIG11bHRpcGxlIHBhdGllbnQgdmlzaXRzIG92ZXIgdGltZSwgbGlrZWx5IG5lZWQgbWl4ZWQgZWZmZWN0cyAKICBtb2RlbAogIC0gT3RoZXJ3aXNlLCB3aWxsIGhhdmUgYmlhcwotIE5lZWQgdG8gZGV0ZXJtaW5lIGEgbWV0aG9kIGZvciBsb29raW5nIGF0IGFyZWFzIG9mIG5lZWQKICAtIFdoYXQgYXJlIHRoZSBpbmRlcGVuZGVudCB2YXJpYWJsZXMgZm9yIHRoaXM/CiAgICAtIExpa2VseSBkZW1vZ3JhcGhpYyB2YXJpYWJsZXMKCgpgYGB7cn0KbGlicmFyeSh0aWR5dmVyc2UpCmBgYAoKYGBge3J9CiMgTG9hZCBkYXRhCiMgc2RvaCA8LSByZWFkX2NzdigiQzovVXNlcnMvaGViZXJzL09uZURyaXZlIC0gVW5pdmVyc2l0eSBPZiBNYXNzYWNodXNldHRzIE1lZGljYWwgU2Nob29sL0RvY3VtZW50cy9VTWFzcyBQcm9qZWN0cy9zZG9oLWxvL1NET0ggRGF0YSAtIFNlcHRlbWJlciAyMDI0LmNzdiIpCnNkb2ggPC0gcmVhZF9jc3YoIi9Vc2Vycy9hbG8vRGVza3RvcC9VTWFzcy9DYXBzdG9uZS9TRE9IIERhdGEgLSA5XyAyMDI0IHdvcmt0aHJvdWdoLmNzdiIpICNBbGV4J3MgZGlyZWN0b3J5IQpzZG9oCmBgYAoKYGBge3J9CiMgVHJhbnNmb3JtIGRhdGEKc2RvaCRjdXJyZW50X2dlbmRlciA8LSBhcy5mYWN0b3Ioc2RvaCRjdXJyZW50X2dlbmRlcikKc2RvaCRnZW5kZXJfaWRlbnRpdHkgPC0gYXMuZmFjdG9yKHNkb2gkZ2VuZGVyX2lkZW50aXR5KQpzZG9oJHJhY2UgPC0gYXMuZmFjdG9yKHNkb2gkcmFjZSkKc2RvaCRldGhuaWNpdHkgPC0gYXMuZmFjdG9yKHNkb2gkZXRobmljaXR5KQpzZG9oJHB0X2xhbmd1YWdlIDwtIGFzLmZhY3RvcihzZG9oJHB0X2xhbmd1YWdlKQpzZG9oJGNpdHkgPC0gYXMuZmFjdG9yKHNkb2gkY2l0eSkKc2RvaCR6aXAgPC0gYXMuZmFjdG9yKHNkb2gkemlwKQpzZG9oJHNkb2hfd2l0aGluX2xhc3RfMTJfbW9udGhzIDwtIGFzLmZhY3RvcihzZG9oJHNkb2hfd2l0aGluX2xhc3RfMTJfbW9udGhzKQpzZG9oJHNjcmVlbl9zdGF0dXMgPC0gYXMuZmFjdG9yKHNkb2gkc2NyZWVuX3N0YXR1cykKYGBgCgpgYGB7cn0KIyBTaW1wbGUgbW9kZWwKc2NyZWVuIDwtIGdsbShzZG9oX3dpdGhpbl9sYXN0XzEyX21vbnRocyB+IHJlbGV2ZWwoZ2VuZGVyX2lkZW50aXR5LCByZWYgPSAiRmVtYWxlIikgKyByZWxldmVsKHJhY2UsIHJlZiA9ICJXaGl0ZSIpLCBmYW1pbHkgPSAiYmlub21pYWwiLCBkYXRhID0gc2RvaCkKc3VtbWFyeShzY3JlZW4pCmBgYAoKYGBge3J9CiMgRXhhbXBsZSBvZiBhZGp1c3RlZCBvZGRzIHJhdGlvcyBhbmQgYWRqdXN0ZWQgcC12YWx1ZXMKcHJpbnQoIkFkanVzdGVkIG9kZHMgcmF0aW9zIikKZXhwKGNvZWYoc2NyZWVuKSkKcHJpbnQoIkFkanVzdGVkIHAtdmFsdWVzIikKcC5hZGp1c3Qoc3VtbWFyeShzY3JlZW4pJGNvZWZmaWNpZW50c1ssIDRdLCBtZXRob2QgPSAiYm9uZmVycm9uaSIpCmBgYAoK</div>
+<div id="rmd-source-code">LS0tCnRpdGxlOiAiUiBOb3RlYm9vayIKb3V0cHV0OiBodG1sX25vdGVib29rCi0tLQoKTm90ZXM6IAoKLSBOZWVkIHBhdGllbnQgaWRlbnRpZmllcgotIFRvIGNvbnRyb2wgZm9yIG11bHRpcGxlIHBhdGllbnQgdmlzaXRzIG92ZXIgdGltZSwgbGlrZWx5IG5lZWQgbWl4ZWQgZWZmZWN0cyAKICBtb2RlbAogIC0gT3RoZXJ3aXNlLCB3aWxsIGhhdmUgYmlhcwotIE5lZWQgdG8gZGV0ZXJtaW5lIGEgbWV0aG9kIGZvciBsb29raW5nIGF0IGFyZWFzIG9mIG5lZWQKICAtIFdoYXQgYXJlIHRoZSBpbmRlcGVuZGVudCB2YXJpYWJsZXMgZm9yIHRoaXM/CiAgICAtIExpa2VseSBkZW1vZ3JhcGhpYyB2YXJpYWJsZXMKCgpgYGB7cn0KbGlicmFyeSh0aWR5dmVyc2UpCmBgYAoKYGBge3J9CiMgTG9hZCBkYXRhCiMgc2RvaCA8LSByZWFkX2NzdigiQzovVXNlcnMvaGViZXJzL09uZURyaXZlIC0gVW5pdmVyc2l0eSBPZiBNYXNzYWNodXNldHRzIE1lZGljYWwgU2Nob29sL0RvY3VtZW50cy9VTWFzcyBQcm9qZWN0cy9zZG9oLWxvL1NET0ggRGF0YSAtIFNlcHRlbWJlciAyMDI0LmNzdiIpCnNkb2ggPC0gcmVhZF9jc3YoIi9Vc2Vycy9hbG8vRGVza3RvcC9VTWFzcy9DYXBzdG9uZS9TRE9IIEZJTkFMIDAxMDEyMDIzIHRvIDA1MzEyMDI0LmNzdiIpICNBbGV4J3MgZGlyZWN0b3J5IQpzZG9oCmBgYAoKYGBge3J9CiMgVHJhbnNmb3JtIGRhdGEKc2RvaCRjdXJyZW50X2dlbmRlciA8LSBhcy5mYWN0b3Ioc2RvaCRjdXJyZW50X2dlbmRlcikKc2RvaCRnZW5kZXJfaWRlbnRpdHkgPC0gYXMuZmFjdG9yKHNkb2gkZ2VuZGVyX2lkZW50aXR5KQpzZG9oJHJhY2UgPC0gYXMuZmFjdG9yKHNkb2gkcmFjZSkKc2RvaCRldGhuaWNpdHkgPC0gYXMuZmFjdG9yKHNkb2gkZXRobmljaXR5KQpzZG9oJHB0X2xhbmd1YWdlIDwtIGFzLmZhY3RvcihzZG9oJHB0X2xhbmd1YWdlKQpzZG9oJGNpdHkgPC0gYXMuZmFjdG9yKHNkb2gkY2l0eSkKc2RvaCR6aXAgPC0gYXMuZmFjdG9yKHNkb2gkemlwKQpzZG9oJHNkb2hfd2l0aGluX2xhc3RfMTJfbW9udGhzIDwtIGFzLmZhY3RvcihzZG9oJHNkb2hfd2l0aGluX2xhc3RfMTJfbW9udGhzKQpzZG9oJHNjcmVlbl9zdGF0dXMgPC0gYXMuZmFjdG9yKHNkb2gkc2NyZWVuX3N0YXR1cykKYGBgCgpgYGB7cn0KIyBTaW1wbGUgbW9kZWwKc2NyZWVuIDwtIGdsbShzZG9oX3dpdGhpbl9sYXN0XzEyX21vbnRocyB+IGN1cnJlbnRfZ2VuZGVyICsgcmVsZXZlbChyYWNlLCByZWYgPSAiV2hpdGUiKSwgZmFtaWx5ID0gImJpbm9taWFsIiwgZGF0YSA9IHNkb2gpCnN1bW1hcnkoc2NyZWVuKQpgYGAKCmBgYHtyfQojIEV4YW1wbGUgb2YgYWRqdXN0ZWQgb2RkcyByYXRpb3MgYW5kIGFkanVzdGVkIHAtdmFsdWVzCnByaW50KCJBZGp1c3RlZCBvZGRzIHJhdGlvcyIpCmV4cChjb2VmKHNjcmVlbikpCnByaW50KCJBZGp1c3RlZCBwLXZhbHVlcyIpCnAuYWRqdXN0KHN1bW1hcnkoc2NyZWVuKSRjb2VmZmljaWVudHNbLCA0XSwgbWV0aG9kID0gImJvbmZlcnJvbmkiKQpgYGAKCg==</div>
 
 
 

@@ -21,7 +21,7 @@ library(tidyverse)
 ```{r}
 # Load data
 # sdoh <- read_csv("C:/Users/hebers/OneDrive - University Of Massachusetts Medical School/Documents/UMass Projects/sdoh-lo/SDOH Data - September 2024.csv")
-sdoh <- read_csv("/Users/alo/Desktop/UMass/Capstone/SDOH Data - 9_ 2024 workthrough.csv") #Alex's directory!
+sdoh <- read_csv("/Users/alo/Desktop/UMass/Capstone/SDOH FINAL 01012023 to 05312024.csv") #Alex's directory!
 sdoh
 ```
 

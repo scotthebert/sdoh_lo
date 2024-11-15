@@ -22,6 +22,8 @@ When you click the **Knit** button a document will be generated that includes bo
 ```{r}
 library(tidyverse)
 library(dplyr)
+library(gt)
+library(gtExtras)
 #Load data
 rm(list = ls())
 #load in data
@@ -39,22 +41,39 @@ SDOH_mtrx = cbind(pt_ID, SDOH_Data) #Master dataset with patient number included
 
 #Set date range of appointments between 06/01/2023 and 05/31/2024
 SDOH_mtrx$appt_date = as.Date(SDOH_mtrx$appt_date, format = "%m/%d/%y")
-SDOH_DS = SDOH_mtrx[SDOH_mtrx$appt_date >= as.Date("06/01/23", format = "%m/%d/%y"),] #DS with correct date range
+SDOH_DateCor = SDOH_mtrx[SDOH_mtrx$appt_date >= as.Date("06/01/23", format = "%m/%d/%y"),] #DS with correct date range
+SDOH_DS = SDOH_DateCor[SDOH_DateCor$location_name %in% c('Family Practice 1', 
+                                                         'Family Practice 2',
+                                                         'Family Practice 3',
+                                                         'Family Practice 4',
+                                                         'Family Practice HOAP'),]
+#Set Location name to be only in family practice
+
+SDOH_DS_T1 = SDOH_DateCor[SDOH_DateCor$location_name %in% c('Family Practice 1'),]
+SDOH_DS_T2 = SDOH_DateCor[SDOH_DateCor$location_name %in% c('Family Practice 2'),]
+SDOH_DS_T3 = SDOH_DateCor[SDOH_DateCor$location_name %in% c('Family Practice 3'),]
+SDOH_DS_T4 = SDOH_DateCor[SDOH_DateCor$location_name %in% c('Family Practice 4'),]
+SDOH_DS_HOAP = SDOH_DateCor[SDOH_DateCor$location_name %in% c('Family Practice HOAP'),]
+
+nrow(SDOH_DS)
+nrow(SDOH_DS_T1)
+nrow(SDOH_DS_T2)
+nrow(SDOH_DS_T3)
+nrow(SDOH_DS_T4)
+nrow(SDOH_DS_HOAP)
 ```
 
 Quantifying Demographic
 ```{r}
 # Quantify Race --------------------------------------------------------------------
 race_tbl = table(SDOH_DS$race)
-#race_prop_tbl = prop.table(race_tbl)
-#colnames(race_prop_tbl) <- c("Freq")
 white_row = cbind(race_tbl['White'], row.names('White'))
 aa_row = cbind(race_tbl['Black or African American'], row.names('Black or African American'))
 ai_row = cbind(race_tbl['American Indian or Alaska Native'], row.names('American Indian or Alaska Native'))
 unreported_race = cbind(race_tbl['Unreported/Refused To Report'], row.names('Unreported/Refused To Report')) 
 
 #Match census groups: Asian includes Chinese, Asian Indian, Other Asian
-asian_ct = race_tbl['Asian'] + race_tbl['Asian Indian'] + race_tbl['Chinese'] + race_tbl['Other Asian']
+asian_ct = race_tbl['Asian'] + race_tbl['Asian Indian'] + race_tbl['Other Asian']
 asian_row = cbind(asian_ct, row.names('Asian'))
 
 #Match census groups: Hawaiian or Other Pacific Islander
@@ -66,6 +85,19 @@ census_tbl_rep = rbind(white_row, aa_row, ai_row, asian_row, hpi_row)
 colnames(census_tbl_rep) <- c('Patients')
 census_prop = prop.table(census_tbl_rep)### report this as proportion of patients
 
+# #try to make a nice table
+# census_prop_tbl <- tibble(
+#   name = rownames(census_prop),
+#   size = census_prop,
+# )
+
+# gt_census <-gt(census_prop_tbl)
+# gt_census <- 
+#   gt_census %>%
+#   tab_stubhead(label = "Race")
+#   # tab_header(title = "Patient Race")
+#   # |> tab_stubhead(label = "Race")
+
 census_tbl_unrep = rbind(white_row, aa_row, ai_row, asian_row, hpi_row,unreported_race)
 colnames(census_tbl_unrep) <- c('Patients')
 census_prop_unrep = prop.table(census_tbl_unrep)
@@ -76,18 +108,6 @@ race_chart <- data.frame("Race" = rownames(census_prop), census_prop)
 data <- race_chart[, c('Race', 'Patients')]
 
 #pie chart reported-----
-# colors <- c('rgb(211,94,96)', 'rgb(128,133,133)', 'rgb(144,103,167)', 'rgb(171,104,87)', 'rgb(114,147,203)')
-# fig <- plot_ly(data, labels = ~Race, values = ~Patients, type = 'pie')
-# fig <- fig %>% layout(title = 'Race of patients FHCW primary care',
-#                       xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
-#                       yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
-# 
-# fig
-
-# pie chart unreported-----
-####unreported to be reported in final write up!!
-race_chart <- data.frame("Race" = rownames(census_prop_unrep), census_prop_unrep) #
-data <- race_chart[, c('Race', 'Patients')]
 colors <- c('rgb(211,94,96)', 'rgb(128,133,133)', 'rgb(144,103,167)', 'rgb(171,104,87)', 'rgb(114,147,203)')
 fig <- plot_ly(data, labels = ~Race, values = ~Patients, type = 'pie')
 fig <- fig %>% layout(title = 'Race of patients FHCW primary care',
@@ -95,6 +115,18 @@ fig <- fig %>% layout(title = 'Race of patients FHCW primary care',
                       yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
 
 fig
+
+# # pie chart unreported-----
+# ####unreported to be reported in final write up!!
+# race_chart <- data.frame("Race" = rownames(census_prop_unrep), census_prop_unrep) #
+# data <- race_chart[, c('Race', 'Patients')]
+# colors <- c('rgb(211,94,96)', 'rgb(128,133,133)', 'rgb(144,103,167)', 'rgb(171,104,87)', 'rgb(114,147,203)')
+# fig <- plot_ly(data, labels = ~Race, values = ~Patients, type = 'pie')
+# fig <- fig %>% layout(title = 'Race of patients FHCW primary care',
+#                       xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+#                       yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+# 
+# fig
 
 #bar chart----
 # fig <- plot_ly(
@@ -107,8 +139,31 @@ fig
 # fig
 
 census_prop #table of race at FHCW
-pct_unrep #proportion of patients who didn't report race at FHCW
+# pct_unrep #proportion of patients who didn't report race at FHCW
 
+#Create new column for census race in SDOH_DS----
+crace_col = matrix(nrow = nrow(SDOH_DS), ncol = 1)
+for (rr in 1:nrow(SDOH_DS)) {
+  if (SDOH_DS$race[rr] == 'White') {
+    crace_col[rr] = paste('White')
+  } else if (SDOH_DS$race[rr] == 'Black or African American') {
+    crace_col[rr] = paste('Black or African American')
+  } else if (SDOH_DS$race[rr] == 'Asian' |
+             SDOH_DS$race[rr] == 'Asian Indian'
+             |
+             SDOH_DS$race[rr] == 'Chinese' |
+             SDOH_DS$race[rr] == 'Other Asian') {
+    crace_col[rr] = paste('Asian')
+  } else if (SDOH_DS$race[rr] == 'American Indian or Alaska Native') {
+    crace_col[rr] = paste('American Indian or Alaska Native')
+  } else if(SDOH_DS$race[rr] == 'Native Hawaiian'|SDOH_DS$race[rr] == 'Other Pacific Islander') {
+    crace_col[rr] = paste('Hawaiian or Other Pacific Islander')
+  } else{
+    crace_col[rr] = paste('Unreported')
+  }
+}
+colnames(crace_col) = c('census_race')
+SDOH_DS = cbind(SDOH_DS, crace_col) #Master dataset with patient number included
 ```
 
 
@@ -166,6 +221,9 @@ pr_row = cbind(eth_tbl['Puerto Rican', ], row.names('Puerto Rican'))
 mex_row = cbind(eth_tbl['Mexican, Mexican American, Chicano/a', ], row.names('Mexican, Mexican American, Chicano/a'))
 hisp_tbl = rbind(hl_row, cuban_row, pr_row, mex_row, other_row)
 hisp_prop = prop.table(hisp_tbl)
+
+hs_yn #hispanic yes/no table
+hisp_prop #breakdown of hispanic
 ```
 
 ```{r}
@@ -201,10 +259,13 @@ transgender_ct = gender_tbl['Female-to-Male (FTM)/Transgender Male/Trans Man',] 
 other_gender_ct = gender_tbl['Genderqueer, neither exclusively male nor female',] + gender_tbl['Additional gender category or other, please specify', ]
 
 #Table of reported genders, including undisclosed
-gender_tbl_adj = rbind(male_ct, female_ct, transgender_ct, other_gender_row, unreported_gender)
+gender_tbl_adj = rbind(male_ct, female_ct, transgender_ct, other_gender_ct, unreported_gender)
 rownames(gender_tbl_adj) <- c("Male", "Female", "Transgender", "Other", "Undisclosed")
-gender_prop_adj = prop.table(gender_tbl_adj) ### report this 
+gender_prop_adj = prop.table(gender_tbl_adj)*100 ### report this 
+colnames(gender_prop_adj) = c("Percentage")
 
+gender_prop_adj
+gender_tbl_adj
 ```
 
 ```{r}
@@ -232,7 +293,7 @@ fig <- fig %>% layout(title = 'Most popular languages at FHCW',
 
 fig
 
-
+lang_final*100 #languages table
 ```
 
 ```{r}
@@ -246,8 +307,9 @@ older_ct = 0
 geri_ct = 0
 unk_age_ct = 0
 birthyr_adj = 0
+age_col =  matrix(nrow = nrow(SDOH_DS), ncol = 1)
 
-for (zz in 1:pt_nbr){
+for (zz in 1:nrow(SDOH_DS)){
   # dt_fix = sprintf("%08s", SDOH_DS$pt_dob[zz])
   # birthdate = as.Date(dt_fix, format = "%m/%d/%y")
   birthdate = as.Date(SDOH_DS$pt_dob[zz], format = "%m/%d/%y")
@@ -255,13 +317,15 @@ for (zz in 1:pt_nbr){
   
   #if birth year shows after 2025, adjust so it is 1900s
   if (birthyr > 2024){
-    birthyr_adj = as.character(birthyr - 100)
-    mmdd = format(birthdate, "%m/%d")
-    birthdate_adj = paste(mmdd, birthyr_adj, sep = "/")
-    birthdate = as.Date(birthdate_adj,format = "%m/%d/%y")
+    birthyr = as.numeric(birthyr - 100)
+    # mmdd = format(birthdate, "%m/%d")
+    # birthdate_adj = paste(mmdd, birthyr, sep = "/")
+    # birthdate = as.Date(birthdate_adj,format = "%m/%d/%y")
   }
   
-  age = age_calc(birthdate, units = "years")
+  # age = age_calc(birthdate, units = "years") old way to calc age
+  age = 2024 - birthyr
+  age_col[zz] = age
   if (age < 5) {
       inf_ct = inf_ct + 1
   }else if (age >= 5 && age <20 ){
@@ -277,8 +341,48 @@ for (zz in 1:pt_nbr){
   }else {
     unk_age_ct = unk_age_ct + 1
   }
-}
   
+  #table of age counts
+  age_table = rbind(inf_ct, adol_ct, younga_ct, mida_ct, older_ct, geri_ct)
+  rownames(age_table) = c("less than 5", "5 - 19", "20 - 34", 
+                          "35 - 49", "50 - 64", "65 and older")
+  age_prop_table= round(prop.table(age_table)*100,2)
+  colnames(age_prop_table) = c("Percentage")
+  #prop table of age counts
+}
+
+library(plotly)
+
+age_prop_table #percent of patients in each age bracket
+
+#bar chart----
+
+fig <- plot_ly(
+  x = rownames(age_prop_table),
+  y = age_prop_table[,1],
+  name = "Pt Age Breakdown",
+  type = "bar")
+  
+# ) 
+
+fig <- fig %>% layout(xaxis = list(autotypenumbers = 'strict',
+                        categoryorder = "array",
+                      categoryarray = c('Less than 5', '5 - 19', '20 - 34', '35 - 49', '50 - 64', '65 and older')))
+
+
+fig
+
+#Plot with ggplot
+library(ggplot2)
+data_age = data.frame(
+  name = rownames(age_prop_table),
+  value = age_prop_table[,1]
+)
+
+data_age %>%
+  arrange(value) %>%
+  mutate(name = factor(name, levels = c("Less than 5", "5 - 19", "20 - 34", "35 - 49", "50 - 64", "65 and older"))) %>%
+  ggplot(aes(x=name, y=value)) + geom_bar(stat = "identity")
 ```
 
 ```{r}
@@ -291,66 +395,269 @@ for (zz in 1:pt_nbr){
 # zip_prop_tbl = prop.table(city_tbl)
 ```
 
-```{r}
-##SDOH in last 12 months----------------------
-scrnd_tbl = as.matrix(table(SDOH_DS$sdoh_within_last_12_months))
-scrnd_prop_tbl = prop.table(scrnd_tbl)
-```
+
 
 ```{r}
-#Has patient been screened in the past year?---------------------------------
+#Has patient been screened in the past year between all teams?----------------------
 notutd_scrn = 0
+utd_scrn = 0
+null_scrn = 0
 curyr = 0
-yr_scrn_mtrx = matrix(nrow = pt_nbr, ncol = 1)
-for (ii in 1:pt_nbr){
-  yr_scrn = as.numeric(format(as.Date(SDOH_DS$last_sdoh_complete[ii], format = "%m/%d/%y"), "%Y"))
-  yr_scrn_mtrx[ii] = yr_scrn
-  if (!is.na(yr_scrn)) {
-    if (yr_scrn != 2023 & yr_scrn != 2024){
+dt_scrn_mtrx = matrix(nrow =nrow(SDOH_DS), ncol = 1) #include null responses
+dt_scrn_only = matrix(nrow =nrow(SDOH_DS), ncol = 1) #no null responses
+utd_ind = matrix(nrow = nrow(SDOH_DS), ncol = 1)
+
+for (ii in 1:nrow(SDOH_DS)) {
+  dt_scrn = as.Date(SDOH_DS$last_sdoh_complete[ii], format = "%m/%d/%y")
+  #enter date into matrix for reference, only month and year
+  yr_thrs = as.Date(SDOH_DS$appt_date[ii], format = "%m/%d/%y") - 365 #one year before 
+  if (!is.na(dt_scrn)) {
+      dt_scrn_mtrx[ii] = format(dt_scrn, "%Y-%m")
+      dt_scrn_only[ii] = format(dt_scrn, "%Y-%m")
+    # if (dt_scrn >= as.Date("2023-06-01") &
+    #     dt_scrn <= as.Date("2024-05-31")) 
+      if (dt_scrn >= yr_thrs){
+      utd_scrn = utd_scrn + 1
+      utd_ind[ii] = paste("Y")
+    } else{
       notutd_scrn = notutd_scrn + 1
+      utd_ind[ii] = paste("N")
     }
-    if (yr_scrn == 2024)
-      curyr = curyr + 1 #number of patients screened in 2024 and therefore will not count in our final count
+  }else{
+    #If screen date is null just indicate as null
+    dt_scrn_mtrx[ii] = "NULL"
+    utd_ind[ii] = paste("N")
+    null_scrn = null_scrn + 1
   }
 }
-scrn_frqtbl = as.matrix(table(yr_scrn_mtrx))
-scrn_prptbl = prop.table(scrn_frqtbl)
 
-fig <- plot_ly(
-  x = rownames(scrn_prptbl),
-  y = scrn_prptbl[,1],
-  name = "SDOH Screening rates for 2023 pt visits",
-  type = "bar"
-)
+SDOH_DS = cbind(SDOH_DS, utd_ind) #Master dataset with up to date indicator included
+
+#how many people are up to date on screening----
+utd_tbl= rbind(utd_scrn, notutd_scrn, null_scrn)
+rownames(utd_tbl) = c("Up to Date", "Not Up to Date", "NULL result")
+utd_prop = prop.table(utd_tbl)*100
+colnames(utd_prop) = c("Freq")
+
+utd_tbl_nonull= rbind(utd_scrn, notutd_scrn)
+rownames(utd_tbl_nonull) = c("Up to Date", "Not Up to Date")
+utd_prop_nonull = prop.table(utd_tbl_nonull)*100
+colnames(utd_prop_nonull) = c("Freq")
+
+utd_prop #tbl showing if patients are up to date on screening, with null
+utd_prop_nonull #tbl showing if pts up to date excluding null results
+
+#pie chart visualize up to date
+library(plotly)
+utd_chart <- data.frame("Updated_Screening" = rownames(utd_prop), utd_prop)
+data <- utd_chart[, c('Updated_Screening', 'Freq')]
+colors <- c('rgb(211,94,96)', 'rgb(128,133,133)', 'rgb(144,103,167)', 'rgb(171,104,87)', 'rgb(114,147,203)')
+fig <- plot_ly(data, labels = ~Updated_Screening, values = ~Freq, type = 'pie')
+fig <- fig %>% layout(title = 'Screening Results ALL TEAMS',
+                      xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+                      yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
 
 fig
 
-fig <- plot_ly(
-  x = rownames(scrn_frqtbl),
-  y = scrn_frqtbl[,1],
-  name = "SDOH Screening #s for 2023 pt visits",
-  type = "bar"
-)
+#workthrough to see when most patients had been screened----
+scrn_frqtbl = as.matrix(table(dt_scrn_only)) #no null responses
+scrn_prptbl = as.matrix(prop.table(scrn_frqtbl)*100)
+null_frqtbl = as.matrix(table(dt_scrn_mtrx)) #include null responses
+null_prptbl = as.matrix(prop.table(null_frqtbl)*100)
+pct_null = null_prptbl['NULL',] #outputs percentage of null responses!!!
 
-fig
+# # screening month and year visualized with a bar graph prop table
+# fig <- plot_ly(
+#   x = rownames(scrn_prptbl),
+#   y = scrn_prptbl[,1],
+#   name = "SDOH Screening dates for 06/23 - 06/1 pt visits",
+#   type = "bar"
+# )
+# 
+# fig
+# 
+# # screening month and year visualized with a bar graph freq table
+# fig <- plot_ly(
+#   x = rownames(scrn_frqtbl),
+#   y = scrn_frqtbl[,1],
+#   name = "SDOH Screening #s for 2023 pt visits",
+#   type = "bar"
+# )
+# 
+# fig
+
+#year screened
+# for (ii in 1:pt_nbr){
+#   yr_scrn = as.numeric(format(as.Date(SDOH_DS$last_sdoh_complete[ii], format = "%m/%d/%y"), "%Y"))
+#   yr_scrn_mtrx[ii] = yr_scrn
+#   if (!is.na(yr_scrn)) {
+#     if (yr_scrn != 2023 & yr_scrn != 2024){
+#       notutd_scrn = notutd_scrn + 1
+#     }
+#   }
+# }
+# #just workthrough to see when most patients had been screened
+# scrn_frqtbl = as.matrix(table(yr_scrn_mtrx))
+# scrn_prptbl = prop.table(scrn_frqtbl)
+# 
+
 ```
+
+```{r}
+#Analysis of data for patient visits 06/01/23-05/31/24
+
+# Transform data
+SDOH_DS$current_gender <- as.factor(SDOH_DS$current_gender)
+SDOH_DS$gender_identity <- as.factor(SDOH_DS$gender_identity)
+SDOH_DS$race <- as.factor(SDOH_DS$race)
+SDOH_DS$ethnicity <- as.factor(SDOH_DS$ethnicity)
+SDOH_DS$pt_language <- as.factor(SDOH_DS$pt_language)
+SDOH_DS$city <- as.factor(SDOH_DS$city)
+SDOH_DS$zip <- as.factor(SDOH_DS$zip)
+SDOH_DS$sdoh_within_last_12_months <- as.factor(SDOH_DS$sdoh_within_last_12_months)
+SDOH_DS$screen_status <- as.factor(SDOH_DS$screen_status)
+SDOH_DS$utd_ind <- as.factor(SDOH_DS$utd_ind) #has patient been screened in the last 12 months manually calculated
+SDOH_DS$census_race <- as.factor(SDOH_DS$census_race)
+
+# Simple model
+screen <- glm(SDOH_DS$utd_ind ~ SDOH_DS$current_gender + relevel(SDOH_DS$census_race, ref = "White"), family = "binomial", data = SDOH_DS)
+summary(screen)
+
+```
+```{r}
+# Example of adjusted odds ratios and adjusted p-values
+print("Adjusted odds ratios")
+exp(coef(screen))
+print("Adjusted p-values")
+p.adjust(summary(screen)$coefficients[, 4], method = "bonferroni")
+```
+
+
+```{r}
+#Screening Status----
+scrst_tbl = as.matrix(table(SDOH_DS$screen_status))
+scrst_prop_tbl = as.data.frame(prop.table(scrst_tbl))*100
+colnames(scrst_prop_tbl) <- c("Prop")
+```
+
 
 ```{r}
 #Insurance payer----
 ins_tbl = as.matrix(table(SDOH_DS$enc_payer))
 ins_prop_tbl = as.data.frame(prop.table(ins_tbl))
 colnames(ins_prop_tbl) <- c("Prop")
-ins_prop_tbl_short = filter(ins_prop_tbl, Prop > 0.01) #if more than 1% of patients have a specific insurance, include in new table
+# ins_prop_tbl_short = filter(ins_prop_tbl, Prop > 0.01) #if more than 1% of patients have a specific insurance, include in new table
 
-ins_prop_tbl
+#insurance categories
+ins_type = matrix(nrow =nrow(SDOH_DS), ncol = 1)
+medaid = 0
+medcare = 0
+public_other=0
+private = 0
+for (p in 1:nrow(SDOH_DS)) {
+  #Medicaid
+  if (SDOH_DS$enc_payer[p] == "Carelon BMC Health Net" |
+      SDOH_DS$enc_payer[p] == "Carelon FCHP" |
+      SDOH_DS$enc_payer[p] == "CMSP Masshealth" |
+      SDOH_DS$enc_payer[p] == "HSN 100" |
+      SDOH_DS$enc_payer[p] == "HSN 20" |
+      SDOH_DS$enc_payer[p] == "MassHealth PCC Not FHCW" |
+      SDOH_DS$enc_payer[p] == "MBHP" |
+      SDOH_DS$enc_payer[p] == "MH C3 ACO Not FHCW" |
+      SDOH_DS$enc_payer[p] == "MH C3 FHCW" |
+      SDOH_DS$enc_payer[p] == "MH CommonHealth" |
+      SDOH_DS$enc_payer[p] == "MH EAEDC" |
+      SDOH_DS$enc_payer[p] == "MH Fallon 365 ACO" |
+      SDOH_DS$enc_payer[p] == "MH Family Assistance" |
+      SDOH_DS$enc_payer[p] == "MH General Brigham" |
+      SDOH_DS$enc_payer[p] == "MH Limited" |
+      SDOH_DS$enc_payer[p] == "MH Partners ACO" |
+      SDOH_DS$enc_payer[p] == "MH PCC" |
+      SDOH_DS$enc_payer[p] == "MH Standard" |
+      SDOH_DS$enc_payer[p] == "MH Steward Health ACO" |
+      SDOH_DS$enc_payer[p] == "MH Wellforce ACO" |
+      SDOH_DS$enc_payer[p] == "MH Wellsense Essential MCO" |
+      SDOH_DS$enc_payer[p] == "MHWellsense HealthNet Community Alliance" |
+      SDOH_DS$enc_payer[p] == "Tufts Health Direct" |
+      SDOH_DS$enc_payer[p] == "Tufts Health Together" |
+      SDOH_DS$enc_payer[p] == "Wellsense CarePlus" |
+      SDOH_DS$enc_payer[p] == "Wellsense CommCare") {
+    medaid = medaid + 1
+    ins_type[p] = paste("Medicaid")
+    #medicare
+  } else if (SDOH_DS$enc_payer[p] == "Aetna Medicare Part C" |
+             SDOH_DS$enc_payer[p] == "CCA Medicare Preferred PPO" |
+             SDOH_DS$enc_payer[p] == "Fallon Advantage" |
+             SDOH_DS$enc_payer[p] == "Fallon Medicare Supplement Plan" |
+             SDOH_DS$enc_payer[p] == "Humana Care Plus" |
+             SDOH_DS$enc_payer[p] == "Humana Health Plans Of Puerto Rico" |
+             SDOH_DS$enc_payer[p] == "Humana Medicare Part C" |
+             SDOH_DS$enc_payer[p] == "MCS Advantage INC" |
+             SDOH_DS$enc_payer[p] == "Medicare" |
+             SDOH_DS$enc_payer[p] == "NGS Medicare" |
+             SDOH_DS$enc_payer[p] == "Tufts Health Plan Medicare Preferred" |
+             SDOH_DS$enc_payer[p] == "Tufts HMO Medicare Compliment" |
+             SDOH_DS$enc_payer[p] == "United Health AARP Medicare Complete") {
+    medcare = medcare + 1
+    ins_type[p] = paste("Medicare")
+    #dual medicare and medicaid
+  } else if (SDOH_DS$enc_payer[p] == "MassHealth Commonwealth Care Alliance" |
+             SDOH_DS$enc_payer[p] == "OneCare United Healthcare" |
+             SDOH_DS$enc_payer[p] == "OneCare/SCO Commonwealth Care Alliance" |
+             SDOH_DS$enc_payer[p] == "OneCareTufts Health Unify" |
+             SDOH_DS$enc_payer[p] == "SCO Fallon Navicare" |
+             SDOH_DS$enc_payer[p] == "SCO Senior Whole Health" |
+             SDOH_DS$enc_payer[p] == "SCO Tufts Health" |
+             SDOH_DS$enc_payer[p] == "SCO United Health Evercare" |
+             SDOH_DS$enc_payer[p] == "United Health Senior Care Options") {
+    medcare = medcare + 1
+    medaid = medaid + 1
+    ins_type[p] = paste("Dual Medicare/ Medicaid")
+  } else if (SDOH_DS$enc_payer[p] == "MBCCP" |
+             SDOH_DS$enc_payer[p] == "Point Comfort Underwriters Inc" |
+             SDOH_DS$enc_payer[p] == "School Based Health - 8504128" |
+             SDOH_DS$enc_payer[p] == "School Based MassHealth" |
+             SDOH_DS$enc_payer[p] == "Adolescent – 8504664" |
+             SDOH_DS$enc_payer[p] == "RIH - 8504680"|
+             SDOH_DS$enc_payer[p] == "HOAP Program - 8503690") {
+    public_other = public_other + 1
+    ins_type[p] = paste("Other Public")
+  } else{
+    private = private + 1
+    ins_type[p] = paste("Private")
+  }
+}
+ins_type_tbl = as.matrix(table(ins_type))
+ins_type_prop_tbl = prop.table(ins_type_tbl)*100
+ins_type_prop_tbl
 ```
 
 ```{r} 
 #Zip----
-zip_tbl = as.matrix(table(SDOH_DS$zip))
+zip_cut = as.numeric(substr(SDOH_DS$zip, 1, 4))
+zip_tbl = as.matrix(table(zip_cut))
 zip_prop_tbl = as.data.frame(prop.table(zip_tbl))
-colnames(zip_prop_tbl) <- c("Prop")
-zip_prop_tbl_short = filter(zip_prop_tbl, Prop > 0.01) #if more than 1% of patients have a specific zip, include in new table
+colnames(zip_prop_tbl) <- c("Freq")
+other_zip = sum(zip_prop_tbl[zip_prop_tbl["Freq"] <= .02,] )
+zip_prop_tbl_short = filter(zip_prop_tbl, Freq > 0.02) #if more than 1% of patients have a specific zip, include in new table
+
+#create new table
+ccat_zip = filter(zip_prop_tbl, Freq > 0.02) #if more than 2% of patients live in zip, include in new table
+zip_final = rbind(ccat_zip, other_zip)
+rownames(zip_final) = c(rownames(ccat_zip), "Other")
+
+library(plotly)
+zip_chart <- data.frame("Zip" = rownames(zip_final), zip_final)
+data <- zip_chart[, c('Zip', 'Freq')]
+
+#pie chart reported-----
+colors <- c('rgb(211,94,96)', 'rgb(128,133,133)', 'rgb(144,103,167)', 'rgb(171,104,87)', 'rgb(114,147,203)')
+fig <- plot_ly(data, labels = ~Zip, values = ~Freq, type = 'pie')
+fig <- fig %>% layout(title = 'Most common Zip codes at FHCW',
+                      xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+                      yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+
+fig
 ```
 
 ```{r}
@@ -364,6 +671,237 @@ c3_transportation_multi = as.matrix(table(SDOH_DS$transportation_multi))
 c3_runoutmon4food = as.matrix(table(SDOH_DS$txt_run_out))
 c3_services = as.matrix(table(SDOH_DS$txt_services))
 c3_work = as.matrix(table(SDOH_DS$txt_work))
+```
+
+```{r}
+#Team 1 patient screening in past year?----------------------
+notutd_scrnT1 = 0
+utd_scrnT1 = 0
+null_scrnT1 = 0
+
+for (ii in 1:nrow(SDOH_DS_T1)) {
+  dt_scrnT1 = as.Date(SDOH_DS_T1$last_sdoh_complete[ii], format = "%m/%d/%y")
+  #enter date into matrix for reference, only month and year
+  yr_thrsT1 = as.Date(SDOH_DS_T1$appt_date[ii], format = "%m/%d/%y") - 365 #one year before 
+  if (!is.na(dt_scrnT1)) {
+    #if no null last screening date, find dates between 06/01/23 and 05/31/24
+       if (dt_scrnT1 >= yr_thrsT1){
+      utd_scrnT1 = utd_scrnT1 + 1
+    } else{
+      notutd_scrnT1 = notutd_scrnT1 + 1
+    }
+  }
+  else{
+    #If screen date is null just indicate as null
+    null_scrnT1 = null_scrnT1 + 1
+  }
+}
+
+#how many people are up to date on screening----
+utd_tbl_T1= rbind(utd_scrnT1, notutd_scrnT1, null_scrnT1)
+rownames(utd_tbl_T1) = c("Up to Date", "Not Up to Date", "NULL result")
+utd_prop_T1 = prop.table(utd_tbl_T1)*100
+colnames(utd_prop_T1) = c("Freq")
+
+utd_prop_T1 #tbl showing if patients are up to date on screening, with null
+
+#pie chart visualize up to date
+library(plotly)
+utd_chart_T1 <- data.frame("Updated_Screening_T1" = rownames(utd_prop_T1), utd_prop_T1)
+data <- utd_chart_T1[, c('Updated_Screening_T1', 'Freq')]
+colors <- c('rgb(211,94,96)', 'rgb(128,133,133)', 'rgb(144,103,167)', 'rgb(171,104,87)', 'rgb(114,147,203)')
+fig <- plot_ly(data, labels = ~Updated_Screening_T1, values = ~Freq, type = 'pie')
+fig <- fig %>% layout(title = 'Screening Results Team 1',
+                      xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+                      yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+
+fig
+
+```
+```{r}
+#Team 2 patient screening in past year?----------------------
+notutd_scrnT2 = 0
+utd_scrnT2 = 0
+null_scrnT2 = 0
+
+for (ii in 1:nrow(SDOH_DS_T2)) {
+  dt_scrnT2 = as.Date(SDOH_DS_T2$last_sdoh_complete[ii], format = "%m/%d/%y")
+  #enter date into matrix for reference, only month and year
+    yr_thrsT2 = as.Date(SDOH_DS_T2$appt_date[ii], format = "%m/%d/%y") - 365 #one year before 
+  if (!is.na(dt_scrnT2)) {
+    #if no null last screening date, find dates between 06/01/23 and 05/31/24
+    if (dt_scrnT2 >= yr_thrsT2) {
+      utd_scrnT2 = utd_scrnT2 + 1
+    } else{
+      notutd_scrnT2 = notutd_scrnT2 + 1
+    }
+  }
+  else{
+    #If screen date is null just indicate as null
+    null_scrnT2 = null_scrnT2 + 1
+  }
+}
+
+#how many people are up to date on screening----
+utd_tbl_T2= rbind(utd_scrnT2, notutd_scrnT2, null_scrnT2)
+rownames(utd_tbl_T2) = c("Up to Date", "Not Up to Date", "NULL result")
+utd_prop_T2 = prop.table(utd_tbl_T2)*100
+colnames(utd_prop_T2) = c("Freq")
+
+utd_prop_T2 #tbl showing if patients are up to date on screening, with null
+
+#pie chart visualize up to date
+library(plotly)
+utd_chart_T2 <- data.frame("Updated_Screening_T2" = rownames(utd_prop_T2), utd_prop_T2)
+data <- utd_chart_T2[, c('Updated_Screening_T2', 'Freq')]
+colors <- c('rgb(211,94,96)', 'rgb(128,133,133)', 'rgb(144,103,167)', 'rgb(171,104,87)', 'rgb(114,147,203)')
+fig <- plot_ly(data, labels = ~Updated_Screening_T2, values = ~Freq, type = 'pie')
+fig <- fig %>% layout(title = 'Screening Results Team 2',
+                      xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+                      yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+
+fig
+
+
+```
+```{r}
+#Team 3 patient screening in past year?----------------------
+notutd_scrnT3 = 0
+utd_scrnT3 = 0
+null_scrnT3 = 0
+
+for (ii in 1:nrow(SDOH_DS_T3)) {
+  dt_scrnT3 = as.Date(SDOH_DS_T3$last_sdoh_complete[ii], format = "%m/%d/%y")
+  #enter date into matrix for reference, only month and year
+  yr_thrsT3 = as.Date(SDOH_DS_T3$appt_date[ii], format = "%m/%d/%y") - 365 #one year before 
+  if (!is.na(dt_scrnT3)) {
+    #if no null last screening date, find dates between 06/01/23 and 05/31/24
+       if (dt_scrnT3 >= yr_thrsT3){
+      utd_scrnT3 = utd_scrnT3 + 1
+    } else{
+      notutd_scrnT3 = notutd_scrnT3 + 1
+    }
+  }
+  else{
+    #If screen date is null just indicate as null
+    null_scrnT3 = null_scrnT3 + 1
+  }
+}
+
+#how many people are up to date on screening----
+utd_tbl_T3= rbind(utd_scrnT3, notutd_scrnT3, null_scrnT3)
+rownames(utd_tbl_T3) = c("Up to Date", "Not Up to Date", "NULL result")
+utd_prop_T3 = prop.table(utd_tbl_T3)*100
+colnames(utd_prop_T3) = c("Freq")
+
+utd_prop_T3 #tbl showing if patients are up to date on screening, with null
+
+#pie chart visualize up to date
+library(plotly)
+utd_chart_T3 <- data.frame("Updated_Screening_T3" = rownames(utd_prop_T3), utd_prop_T3)
+data <- utd_chart_T3[, c('Updated_Screening_T3', 'Freq')]
+colors <- c('rgb(211,94,96)', 'rgb(128,133,133)', 'rgb(144,103,167)', 'rgb(171,104,87)', 'rgb(114,147,203)')
+fig <- plot_ly(data, labels = ~Updated_Screening_T3, values = ~Freq, type = 'pie')
+fig <- fig %>% layout(title = 'Screening Results Team 3',
+                      xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+                      yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+
+fig
+
+
+
+```
+```{r}
+#Team 4 patient screening in past year?----------------------
+notutd_scrnT4 = 0
+utd_scrnT4 = 0
+null_scrnT4 = 0
+
+for (ii in 1:nrow(SDOH_DS_T4)) {
+  dt_scrnT4 = as.Date(SDOH_DS_T4$last_sdoh_complete[ii], format = "%m/%d/%y")
+  #enter date into matrix for reference, only month and year
+  yr_thrsT4 = as.Date(SDOH_DS_T4$appt_date[ii], format = "%m/%d/%y") - 365 #one year before 
+  if (!is.na(dt_scrnT4)) {
+    #if no null last screening date, find dates between 06/01/23 and 05/31/24
+       if (dt_scrnT4 >= yr_thrsT4){
+      utd_scrnT4 = utd_scrnT4 + 1
+    } else{
+      notutd_scrnT4 = notutd_scrnT4 + 1
+    }
+  }
+  else{
+    #If screen date is null just indicate as null
+    null_scrnT4 = null_scrnT4 + 1
+  }
+}
+
+#how many people are up to date on screening----
+utd_tbl_T4= rbind(utd_scrnT4, notutd_scrnT4, null_scrnT4)
+rownames(utd_tbl_T4) = c("Up to Date", "Not Up to Date", "NULL result")
+utd_prop_T4 = prop.table(utd_tbl_T4)*100
+colnames(utd_prop_T4) = c("Freq")
+
+utd_prop_T4 #tbl showing if patients are up to date on screening, with null
+
+#pie chart visualize up to date
+library(plotly)
+utd_chart_T4 <- data.frame("Updated_Screening_T4" = rownames(utd_prop_T4), utd_prop_T4)
+data <- utd_chart_T4[, c('Updated_Screening_T4', 'Freq')]
+colors <- c('rgb(211,94,96)', 'rgb(128,133,133)', 'rgb(144,103,167)', 'rgb(171,104,87)', 'rgb(114,147,203)')
+fig <- plot_ly(data, labels = ~Updated_Screening_T4, values = ~Freq, type = 'pie')
+fig <- fig %>% layout(title = 'Screening Results Team 4',
+                      xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+                      yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+
+fig
+
+
+```
+
+```{r}
+#Team HOAP patient screening in past year?----------------------
+notutd_scrnHOAP = 0
+utd_scrnHOAP = 0
+null_scrnHOAP = 0
+
+for (ii in 1:nrow(SDOH_DS_HOAP)) {
+  dt_scrnHOAP = as.Date(SDOH_DS_HOAP$last_sdoh_complete[ii], format = "%m/%d/%y")
+  #enter date into matrix for reference, only month and year
+   yr_thrsHOAP = as.Date(SDOH_DS_HOAP$appt_date[ii], format = "%m/%d/%y") - 365 #one year before 
+  if (!is.na(dt_scrnHOAP)) {
+    #if no null last screening date, find dates between 06/01/23 and 05/31/24
+       if (dt_scrnHOAP >= yr_thrsHOAP){
+      utd_scrnHOAP = utd_scrnHOAP + 1
+    } else{
+      notutd_scrnHOAP = notutd_scrnHOAP + 1
+    }
+  }
+  else{
+    #If screen date is null just indicate as null
+    null_scrnHOAP = null_scrnHOAP + 1
+  }
+}
+
+#how many people are up to date on screening----
+utd_tbl_HOAP= rbind(utd_scrnHOAP, notutd_scrnHOAP, null_scrnHOAP)
+rownames(utd_tbl_HOAP) = c("Up to Date", "Not Up to Date", "NULL result")
+utd_prop_HOAP = prop.table(utd_tbl_HOAP)*100
+colnames(utd_prop_HOAP) = c("Freq")
+
+utd_prop_HOAP #tbl showing if patients are up to date on screening, with null
+
+#pie chart visualize up to date
+library(plotly)
+utd_chart_HOAP <- data.frame("Updated_Screening_HOAP" = rownames(utd_prop_HOAP), utd_prop_HOAP)
+data <- utd_chart_HOAP[, c('Updated_Screening_HOAP', 'Freq')]
+colors <- c('rgb(211,94,96)', 'rgb(128,133,133)', 'rgb(144,103,167)', 'rgb(171,104,87)', 'rgb(114,147,203)')
+fig <- plot_ly(data, labels = ~Updated_Screening_HOAP, values = ~Freq, type = 'pie')
+fig <- fig %>% layout(title = 'Screening Results Team HOAP',
+                      xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+                      yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+
+fig
+
 ```
 
 ## Including Plots
