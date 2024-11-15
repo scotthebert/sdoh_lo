@@ -179,16 +179,20 @@ lang_nbr=nrow(eth_df)
 hs_n_ct = 0
 hs_y_ct = 0
 hs_unrep_ct = 0
+his_col = matrix(nrow = nrow(SDOH_DS), ncol = 1)
 
 for (i in 1:lang_nbr) {
   current_row = rownames(eth_df)[i]
   if (grepl("Not Hispanic",current_row)) {
     hs_n_ct = hs_n_ct + eth_df[i, "Freq"]
+    his_col[i] = paste('Not Hispanic')
   }else if (grepl("Unreported",current_row)) {
     hs_unrep_ct = hs_unrep_ct + eth_df[i, "Freq"]
+    his_col[i] = paste('Unreported')
   } 
   else{
     hs_y_ct = hs_y_ct + eth_df[i, "Freq"]
+    his_col[i] = paste('Hispanic/ Latino')
   }
 }
 
@@ -222,6 +226,8 @@ mex_row = cbind(eth_tbl['Mexican, Mexican American, Chicano/a', ], row.names('Me
 hisp_tbl = rbind(hl_row, cuban_row, pr_row, mex_row, other_row)
 hisp_prop = prop.table(hisp_tbl)
 
+SDOH_DS = cbind(SDOH_DS, his_col)
+
 hs_yn #hispanic yes/no table
 hisp_prop #breakdown of hispanic
 ```
@@ -231,23 +237,44 @@ hisp_prop #breakdown of hispanic
 gender_tbl = as.matrix(table(SDOH_DS$gender_identity))
 gender_prop_tbl = prop.table(gender_tbl)
 colnames(gender_prop_tbl) <- c("Freq")
+gender_col = matrix(nrow = nrow(SDOH_DS), ncol = 1)
 
 # If unreported, see current gender. If current gender and gender identity null = unreported. ----
 unr_male = 0
 unr_female = 0
 unreported_gender = 0
 
+
 for (g in 1:nrow(SDOH_DS)) {
   if (SDOH_DS$gender_identity[g] == "NULL"|SDOH_DS$gender_identity[g] == "Choose not to disclose" ) {
     if(SDOH_DS$current_gender[g] == "M"){
       unr_male = unr_male + 1 #males who did not respond to gender identity
+      gender_col[g] = paste("Male")
     }else if (SDOH_DS$current_gender[g] == "F"){
       unr_female = unr_female + 1  #females who did not respond to gender identity
+      gender_col[g] = paste("Female")
     }else {
       unreported_gender = unreported_gender + 1 #people who did not disclose gender identity or current gender
+      gender_col[g] = paste("Unreported")
+    }
+  }
+  
+  else if (SDOH_DS$gender_identity[g] != "NULL") {
+    if (SDOH_DS$gender_identity[g] == "Female") {
+      gender_col[g] = paste("Female")
+    }else if (SDOH_DS$gender_identity[g] == "Male") {
+      gender_col[g] = paste("Male")
+    }else if (SDOH_DS$gender_identity[g] == "Female-to-Male (FTM)/Transgender Male/Trans Man"| 
+              SDOH_DS$gender_identity[g] == "Male-to-Female (MTF)/Transgender Female/Trans Woman" ) {
+      gender_col[g] = paste("Transgender")
+    }
+    else if (SDOH_DS$gender_identity[g] == "Genderqueer, neither exclusively male nor female"| 
+              SDOH_DS$gender_identity[g] == "Additional gender category or other, please specify" ) {
+      gender_col[g] = paste("Other Gender")
     }
   }
 }
+SDOH_DS = cbind(SDOH_DS, gender_col) #Master dataset with updated gender column included
 
 #
 female_ct = gender_tbl['Female',] + unr_female
@@ -261,6 +288,7 @@ other_gender_ct = gender_tbl['Genderqueer, neither exclusively male nor female',
 #Table of reported genders, including undisclosed
 gender_tbl_adj = rbind(male_ct, female_ct, transgender_ct, other_gender_ct, unreported_gender)
 rownames(gender_tbl_adj) <- c("Male", "Female", "Transgender", "Other", "Undisclosed")
+colnames(gender_tbl_adj) = c("Percentage")
 gender_prop_adj = prop.table(gender_tbl_adj)*100 ### report this 
 colnames(gender_prop_adj) = c("Percentage")
 
@@ -279,6 +307,7 @@ other_lang = sum(lang_prop_tbl[lang_prop_tbl["Freq"] <= .02,] )
 ccat_lang = filter(lang_prop_tbl, Freq > 0.02) #if more than 1% of patients spoke language, include in new table
 lang_final = rbind(ccat_lang, other_lang)
 rownames(lang_final) = c(rownames(ccat_lang), "Other")
+colnames(lang_final) = c('Percentage')
 
 library(plotly)
 lang_chart <- data.frame("Language" = rownames(lang_final), lang_final)
@@ -369,7 +398,6 @@ fig <- fig %>% layout(xaxis = list(autotypenumbers = 'strict',
                         categoryorder = "array",
                       categoryarray = c('Less than 5', '5 - 19', '20 - 34', '35 - 49', '50 - 64', '65 and older')))
 
-
 fig
 
 #Plot with ggplot
@@ -383,6 +411,9 @@ data_age %>%
   arrange(value) %>%
   mutate(name = factor(name, levels = c("Less than 5", "5 - 19", "20 - 34", "35 - 49", "50 - 64", "65 and older"))) %>%
   ggplot(aes(x=name, y=value)) + geom_bar(stat = "identity")
+
+#add age column to SDOH_DS
+SDOH_DS = cbind(SDOH_DS, age_col)
 ```
 
 ```{r}
@@ -410,7 +441,7 @@ utd_ind = matrix(nrow = nrow(SDOH_DS), ncol = 1)
 for (ii in 1:nrow(SDOH_DS)) {
   dt_scrn = as.Date(SDOH_DS$last_sdoh_complete[ii], format = "%m/%d/%y")
   #enter date into matrix for reference, only month and year
-  yr_thrs = as.Date(SDOH_DS$appt_date[ii], format = "%m/%d/%y") - 365 #one year before 
+  yr_thrs = as.Date(SDOH_DS$appt_date[ii], format = "%m/%d/%y") - 365 #one year before as threshold for "up to date" screening
   if (!is.na(dt_scrn)) {
       dt_scrn_mtrx[ii] = format(dt_scrn, "%Y-%m")
       dt_scrn_only[ii] = format(dt_scrn, "%Y-%m")
@@ -502,45 +533,6 @@ pct_null = null_prptbl['NULL',] #outputs percentage of null responses!!!
 # 
 
 ```
-
-```{r}
-#Analysis of data for patient visits 06/01/23-05/31/24
-
-# Transform data
-SDOH_DS$current_gender <- as.factor(SDOH_DS$current_gender)
-SDOH_DS$gender_identity <- as.factor(SDOH_DS$gender_identity)
-SDOH_DS$race <- as.factor(SDOH_DS$race)
-SDOH_DS$ethnicity <- as.factor(SDOH_DS$ethnicity)
-SDOH_DS$pt_language <- as.factor(SDOH_DS$pt_language)
-SDOH_DS$city <- as.factor(SDOH_DS$city)
-SDOH_DS$zip <- as.factor(SDOH_DS$zip)
-SDOH_DS$sdoh_within_last_12_months <- as.factor(SDOH_DS$sdoh_within_last_12_months)
-SDOH_DS$screen_status <- as.factor(SDOH_DS$screen_status)
-SDOH_DS$utd_ind <- as.factor(SDOH_DS$utd_ind) #has patient been screened in the last 12 months manually calculated
-SDOH_DS$census_race <- as.factor(SDOH_DS$census_race)
-
-# Simple model
-screen <- glm(SDOH_DS$utd_ind ~ SDOH_DS$current_gender + relevel(SDOH_DS$census_race, ref = "White"), family = "binomial", data = SDOH_DS)
-summary(screen)
-
-```
-```{r}
-# Example of adjusted odds ratios and adjusted p-values
-print("Adjusted odds ratios")
-exp(coef(screen))
-print("Adjusted p-values")
-p.adjust(summary(screen)$coefficients[, 4], method = "bonferroni")
-```
-
-
-```{r}
-#Screening Status----
-scrst_tbl = as.matrix(table(SDOH_DS$screen_status))
-scrst_prop_tbl = as.data.frame(prop.table(scrst_tbl))*100
-colnames(scrst_prop_tbl) <- c("Prop")
-```
-
-
 ```{r}
 #Insurance payer----
 ins_tbl = as.matrix(table(SDOH_DS$enc_payer))
@@ -627,10 +619,51 @@ for (p in 1:nrow(SDOH_DS)) {
     ins_type[p] = paste("Private")
   }
 }
+#add insurance type to SDOH_DS
+SDOH_DS = cbind(SDOH_DS, ins_type)
 ins_type_tbl = as.matrix(table(ins_type))
 ins_type_prop_tbl = prop.table(ins_type_tbl)*100
 ins_type_prop_tbl
 ```
+
+```{r}
+#Analysis of data for patient visits 06/01/23-05/31/24
+
+# Transform data
+SDOH_DS$gender_col <- as.factor(SDOH_DS$gender_col) #recalculated gender column
+SDOH_DS$his_col<- as.factor(SDOH_DS$his_col)#recalculated ethnicity column
+SDOH_DS$pt_language <- as.factor(SDOH_DS$pt_language)
+SDOH_DS$city <- as.factor(SDOH_DS$city)
+SDOH_DS$zip <- as.factor(SDOH_DS$zip)
+SDOH_DS$screen_status <- as.factor(SDOH_DS$screen_status) #complete, incomplete, or No Screen
+SDOH_DS$utd_ind <- as.factor(SDOH_DS$utd_ind) #has patient been screened in the last 12 months manually calculated, 
+SDOH_DS$census_race <- as.factor(SDOH_DS$census_race) #recalculated race column
+SDOH_DS$age_col <- as.factor(SDOH_DS$age_col)
+SDOH_DS$ins_type <- as.factor(SDOH_DS$ins_type) #public, private, or dual public/private insurance
+
+# Simple model
+screen <- glm(SDOH_DS$utd_ind ~ SDOH_DS$gender_col + relevel(SDOH_DS$census_race, ref = "White"), family = "binomial", data = SDOH_DS)
+summary(screen)
+```
+
+```{r}
+# Example of adjusted odds ratios and adjusted p-values
+print("Adjusted odds ratios")
+exp(coef(screen))
+print("Adjusted p-values")
+p.adjust(summary(screen)$coefficients[, 4], method = "bonferroni")
+```
+
+
+```{r}
+#Screening Status----
+scrst_tbl = as.matrix(table(SDOH_DS$screen_status))
+scrst_prop_tbl = as.data.frame(prop.table(scrst_tbl))*100
+colnames(scrst_prop_tbl) <- c("Prop")
+```
+
+
+
 
 ```{r} 
 #Zip----
