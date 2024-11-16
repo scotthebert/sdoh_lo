@@ -20,18 +20,19 @@ This is an R Markdown document. Markdown is a simple formatting syntax for autho
 When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
 
 ```{r}
+#This section loads the data and limits the master data sheet to patient visits between 06/01/23 - 05/31/24 for primary care teams 1-4 and HOAP. The datasheet for all primary care teams is saved to a new matrix called SDOH_DS. At the end of this section you can see individual matrices for each team.
+
 library(tidyverse)
 library(dplyr)
 library(gt)
 library(gtExtras)
-#Load data
-rm(list = ls())
-#load in data
-setwd("/Users/alo/Desktop/UMass/Capstone")
-# SDOH_Data = read_csv("SDOH Data - 9_ 2024 workthrough.csv")
-SDOH_Data= read_csv("SDOH FINAL 01012023 to 05312024.csv")
 
-# Adding patient numbers --------------------------------------------------
+#Load data----
+rm(list = ls())
+setwd("/Users/alo/Desktop/UMass/Capstone")
+SDOH_Data= read_csv("SDOH FINAL 01012023 to 05312024.csv") #I renamed the data to be called "FINAL." I will send the CSV and Excel Sheet.
+
+# Adding patient numbers to SDOH_DS --------------------------------------------------
 pt_nbr=nrow(SDOH_Data) #number of patients, ID'ed by number of rows of data
 pt_ID = matrix(nrow = pt_nbr, ncol = 1)
 for (x in 1:pt_nbr){
@@ -39,53 +40,56 @@ for (x in 1:pt_nbr){
 }
 SDOH_mtrx = cbind(pt_ID, SDOH_Data) #Master dataset with patient number included
 
-#Set date range of appointments between 06/01/2023 and 05/31/2024
+##Set date range of appointments between 06/01/2023 and 05/31/2024----
 SDOH_mtrx$appt_date = as.Date(SDOH_mtrx$appt_date, format = "%m/%d/%y")
 SDOH_DateCor = SDOH_mtrx[SDOH_mtrx$appt_date >= as.Date("06/01/23", format = "%m/%d/%y"),] #DS with correct date range
+#Datasheet limited to only family practices
 SDOH_DS = SDOH_DateCor[SDOH_DateCor$location_name %in% c('Family Practice 1', 
                                                          'Family Practice 2',
                                                          'Family Practice 3',
                                                          'Family Practice 4',
                                                          'Family Practice HOAP'),]
-#Set Location name to be only in family practice
-
+#Create individual datasheets for each primary care team for our reference
 SDOH_DS_T1 = SDOH_DateCor[SDOH_DateCor$location_name %in% c('Family Practice 1'),]
 SDOH_DS_T2 = SDOH_DateCor[SDOH_DateCor$location_name %in% c('Family Practice 2'),]
 SDOH_DS_T3 = SDOH_DateCor[SDOH_DateCor$location_name %in% c('Family Practice 3'),]
 SDOH_DS_T4 = SDOH_DateCor[SDOH_DateCor$location_name %in% c('Family Practice 4'),]
 SDOH_DS_HOAP = SDOH_DateCor[SDOH_DateCor$location_name %in% c('Family Practice HOAP'),]
 
-nrow(SDOH_DS)
-nrow(SDOH_DS_T1)
-nrow(SDOH_DS_T2)
-nrow(SDOH_DS_T3)
-nrow(SDOH_DS_T4)
-nrow(SDOH_DS_HOAP)
+#number of patients in each team
+nrow(SDOH_DS) #number of patients across all primary care teams
+nrow(SDOH_DS_T1) #team 1
+nrow(SDOH_DS_T2) #team 2
+nrow(SDOH_DS_T3) #team 3
+nrow(SDOH_DS_T4) #team 4
+nrow(SDOH_DS_HOAP) #team HOAP (homeless outreach team)
 ```
 
 Quantifying Demographic
 ```{r}
-# Quantify Race --------------------------------------------------------------------
+##Race----
+#These reported races (White, African American, American Indian) that are reported align with census options
+#This code adds a column of races per census options to master datasheet under SDOH_DS$crace_col
 race_tbl = table(SDOH_DS$race)
 white_row = cbind(race_tbl['White'], row.names('White'))
 aa_row = cbind(race_tbl['Black or African American'], row.names('Black or African American'))
 ai_row = cbind(race_tbl['American Indian or Alaska Native'], row.names('American Indian or Alaska Native'))
 unreported_race = cbind(race_tbl['Unreported/Refused To Report'], row.names('Unreported/Refused To Report')) 
 
-#Match census groups: Asian includes Chinese, Asian Indian, Other Asian
+#Group together to align with census group: Asian includes Chinese, Asian Indian, Other Asian
 asian_ct = race_tbl['Asian'] + race_tbl['Asian Indian'] + race_tbl['Other Asian']
 asian_row = cbind(asian_ct, row.names('Asian'))
 
-#Match census groups: Hawaiian or Other Pacific Islander
+#Group together to align with census group: Hawaiian or Other Pacific Islander
 hpi_ct = race_tbl['Native Hawaiian'] + race_tbl['Other Pacific Islander'] 
 hpi_row = cbind(hpi_ct, row.names('Hawaiian or Other Pacific Islander'))
 
-#Adjusted table per census
+#Race frequency tables aligned with census options EXCLUDING those who did not report their race
 census_tbl_rep = rbind(white_row, aa_row, ai_row, asian_row, hpi_row)
 colnames(census_tbl_rep) <- c('Patients')
 census_prop = prop.table(census_tbl_rep)### report this as proportion of patients
 
-# #try to make a nice table
+# #try to make a nice table, ignore---
 # census_prop_tbl <- tibble(
 #   name = rownames(census_prop),
 #   size = census_prop,
@@ -98,11 +102,15 @@ census_prop = prop.table(census_tbl_rep)### report this as proportion of patient
 #   # tab_header(title = "Patient Race")
 #   # |> tab_stubhead(label = "Race")
 
-census_tbl_unrep = rbind(white_row, aa_row, ai_row, asian_row, hpi_row,unreported_race)
+#table of responses INCLUDING those who did not report race
+census_tbl_unrep = rbind(white_row, aa_row, ai_row, asian_row, hpi_row,unreported_race) 
 colnames(census_tbl_unrep) <- c('Patients')
 census_prop_unrep = prop.table(census_tbl_unrep)
 pct_unrep = prop.table(census_tbl_unrep)['Unreported/Refused To Report', ]### report this as proportion who did not report race
 
+census_prop #display proportion table of races at FHCW for only reported responses
+
+##Pie chart visualizing race frequencies
 library(plotly)
 race_chart <- data.frame("Race" = rownames(census_prop), census_prop)
 data <- race_chart[, c('Race', 'Patients')]
@@ -138,10 +146,9 @@ fig
 # 
 # fig
 
-census_prop #table of race at FHCW
-# pct_unrep #proportion of patients who didn't report race at FHCW
 
-#Create new column for census race in SDOH_DS----
+
+#Create new column for race in master SDOH_DS matrix aligned with census options----
 crace_col = matrix(nrow = nrow(SDOH_DS), ncol = 1)
 for (rr in 1:nrow(SDOH_DS)) {
   if (SDOH_DS$race[rr] == 'White') {
@@ -163,24 +170,29 @@ for (rr in 1:nrow(SDOH_DS)) {
   }
 }
 colnames(crace_col) = c('census_race')
-SDOH_DS = cbind(SDOH_DS, crace_col) #Master dataset with patient number included
+SDOH_DS = cbind(SDOH_DS, crace_col) #Add Census race column to master dataset
 ```
 
 
 ```{r}
-# Ethnicity-------------------------------------------------------------------------
+## Ethnicity-------------------------------------------------------------------------
+# "Ethnicity" means if patient has hispanic or latino origin, per census options. Adds a new column to master datasheet to be aligned with census options under "SDOH_DS$his_col"
+# I apologize as this code is not straightforward, was one of my first attempts at refreshing my R skills
+
+#freq table of ethnicity responses
 eth_tbl = as.matrix(table(SDOH_DS$ethnicity))
 eth_prop_tbl = prop.table(eth_tbl)
 colnames(eth_prop_tbl) <- c("Freq")
 
-eth_df = as.data.frame(eth_tbl)
+eth_df = as.data.frame(eth_tbl) #probably unnecessarily making matrix into a dataframe
 colnames(eth_df) = "Freq"
 lang_nbr=nrow(eth_df)
-hs_n_ct = 0
-hs_y_ct = 0
-hs_unrep_ct = 0
-his_col = matrix(nrow = nrow(SDOH_DS), ncol = 1)
+hs_n_ct = 0 #"not hispanic" count
+hs_y_ct = 0 #"hispanic" count
+hs_unrep_ct = 0 #"did not report" ethnicity count
+his_col = matrix(nrow = nrow(SDOH_DS), ncol = 1) #column for ethnicity responses to be added to SDOH_DS
 
+#Adds a column to SDOH_DS that reports if patient was hispanic or latino. Also counts frequency of responses to "ethnicity."
 for (i in 1:lang_nbr) {
   current_row = rownames(eth_df)[i]
   if (grepl("Not Hispanic",current_row)) {
@@ -195,7 +207,10 @@ for (i in 1:lang_nbr) {
     his_col[i] = paste('Hispanic/ Latino')
   }
 }
+#Add ethnicity column to SDOH_DS
+SDOH_DS = cbind(SDOH_DS, his_col)
 
+#Table of responses, aligned with Census options
 hs_yn = matrix(
   c(hs_y_ct, hs_n_ct, hs_unrep_ct),
   nrow = 3,
@@ -205,7 +220,7 @@ rownames(hs_yn) = c("Hispanic", "Not Hispanic", "Unreported")
 colnames(hs_yn) = c("pts")
 
 
-#pie chart if report hispanic or not
+#pie chart if report hispanic or not per census options
 eth_chart <- data.frame("Ethnicity" = rownames(hs_yn), hs_yn)
 data <- eth_chart[, c('Ethnicity', 'pts')]
 colors <- c('rgb(211,94,96)', 'rgb(128,133,133)', 'rgb(144,103,167)', 'rgb(171,104,87)', 'rgb(114,147,203)')
@@ -216,7 +231,8 @@ fig <- fig %>% layout(title = 'Ethnicity of patients FHCW primary care',
 
 fig
 
-#Breakdown of hispanic-----
+##Breakdown of hispanic/Latino to specific nationalities, which were options in EMR-----
+#quantified out of curiosity. Will likely not include in final reports.
 hl_ct = eth_tbl['Hispanic, Latino/a, Spanish Origin, Combined',] + eth_tbl['Hispanic or Latino',]
 hl_row = cbind(hl_ct, row.names('Hispanic or Latino'))
 cuban_row = cbind(eth_tbl['Cuban', ], row.names('Cuban'))
@@ -226,14 +242,14 @@ mex_row = cbind(eth_tbl['Mexican, Mexican American, Chicano/a', ], row.names('Me
 hisp_tbl = rbind(hl_row, cuban_row, pr_row, mex_row, other_row)
 hisp_prop = prop.table(hisp_tbl)
 
-SDOH_DS = cbind(SDOH_DS, his_col)
-
+#Display the hispanic frequency table and proporiton table, according to census options
 hs_yn #hispanic yes/no table
 hisp_prop #breakdown of hispanic
 ```
 
 ```{r}
-# Gender Identity ---------------------------------------------------------
+## Gender Identity ---------------------------------------------------------
+# If gender identity is not reported in SDOH_DS, we take the patient's response to "current gender." This code combines the sum of both columsn and reports it in a new colum called "SDOH_DS$gender_col"
 gender_tbl = as.matrix(table(SDOH_DS$gender_identity))
 gender_prop_tbl = prop.table(gender_tbl)
 colnames(gender_prop_tbl) <- c("Freq")
@@ -326,7 +342,9 @@ lang_final*100 #languages table
 ```
 
 ```{r}
-#age calculation
+##Age----
+#Patient DOB is reported in our imported csv. This code calculates patient year age by subtracting current 2024 from their birth year. It is then put into the common age brackets found on the Census.gov website. Age column is added to master datasheet under SDOH_DS$age_col 
+
 library(eeptools)
 inf_ct = 0
 adol_ct = 0
@@ -338,23 +356,21 @@ unk_age_ct = 0
 birthyr_adj = 0
 age_col =  matrix(nrow = nrow(SDOH_DS), ncol = 1)
 
+#Calculates age for each patient in master datasheet
 for (zz in 1:nrow(SDOH_DS)){
-  # dt_fix = sprintf("%08s", SDOH_DS$pt_dob[zz])
-  # birthdate = as.Date(dt_fix, format = "%m/%d/%y")
   birthdate = as.Date(SDOH_DS$pt_dob[zz], format = "%m/%d/%y")
   birthyr = as.numeric(format(birthdate, "%Y"))
   
-  #if birth year shows after 2025, adjust so it is 1900s
+  #As.date function may mistakenly display DOB after 2025 (i.e. "DOB 1/1/65" is displayed as "1/1/2065")
+  # if birth year shows after 2025, subract 100 years to be in 1900s
   if (birthyr > 2024){
     birthyr = as.numeric(birthyr - 100)
-    # mmdd = format(birthdate, "%m/%d")
-    # birthdate_adj = paste(mmdd, birthyr, sep = "/")
-    # birthdate = as.Date(birthdate_adj,format = "%m/%d/%y")
   }
   
-  # age = age_calc(birthdate, units = "years") old way to calc age
+  #Age calculation and adds age to a new column.
   age = 2024 - birthyr
   age_col[zz] = age
+  #Puts patient age into one of 6 commonly reported age brackets.
   if (age < 5) {
       inf_ct = inf_ct + 1
   }else if (age >= 5 && age <20 ){
@@ -368,117 +384,104 @@ for (zz in 1:nrow(SDOH_DS)){
   }else if (age >= 65 ){
     geri_ct = geri_ct + 1
   }else {
-    unk_age_ct = unk_age_ct + 1
+    unk_age_ct = unk_age_ct + 1 #if age is unknown for any NULL edge cases
   }
-  
-  #table of age counts
-  age_table = rbind(inf_ct, adol_ct, younga_ct, mida_ct, older_ct, geri_ct)
-  rownames(age_table) = c("less than 5", "5 - 19", "20 - 34", 
-                          "35 - 49", "50 - 64", "65 and older")
-  age_prop_table= round(prop.table(age_table)*100,2)
-  colnames(age_prop_table) = c("Percentage")
-  #prop table of age counts
 }
 
+#add age column to SDOH_DS
+SDOH_DS = cbind(SDOH_DS, age_col)
+
+#Creates a table of ages based on age brackets above.
+age_table = rbind(inf_ct, adol_ct, younga_ct, mida_ct, older_ct, geri_ct)
+rownames(age_table) = c("less than 5", "5 - 19", "20 - 34", "35 - 49", "50 - 64", "65 and older")
+age_prop_table = round(prop.table(age_table) * 100, 2)
+colnames(age_prop_table) = c("Percentage")
+#prop table of age counts
+
 library(plotly)
+age_prop_table # Display proportion table of patients in each age bracket
 
-age_prop_table #percent of patients in each age bracket
-
-#bar chart----
-
+#bar chart to visualize age brackets----
 fig <- plot_ly(
   x = rownames(age_prop_table),
   y = age_prop_table[,1],
   name = "Pt Age Breakdown",
   type = "bar")
-  
-# ) 
 
 fig <- fig %>% layout(xaxis = list(autotypenumbers = 'strict',
                         categoryorder = "array",
                       categoryarray = c('Less than 5', '5 - 19', '20 - 34', '35 - 49', '50 - 64', '65 and older')))
-
 fig
 
-#Plot with ggplot
-library(ggplot2)
-data_age = data.frame(
-  name = rownames(age_prop_table),
-  value = age_prop_table[,1]
-)
+# #Plot with ggplot, attempted to use to force histogram to display in a certain way and coudl not figure it out.
+# library(ggplot2)
+# data_age = data.frame(
+#   name = rownames(age_prop_table),
+#   value = age_prop_table[,1]
+# )
+# 
+# data_age %>%
+#   arrange(value) %>%
+#   mutate(name = factor(name, levels = c("Less than 5", "5 - 19", "20 - 34", "35 - 49", "50 - 64", "65 and older"))) %>%
+#   ggplot(aes(x=name, y=value)) + geom_bar(stat = "identity")
 
-data_age %>%
-  arrange(value) %>%
-  mutate(name = factor(name, levels = c("Less than 5", "5 - 19", "20 - 34", "35 - 49", "50 - 64", "65 and older"))) %>%
-  ggplot(aes(x=name, y=value)) + geom_bar(stat = "identity")
-
-#add age column to SDOH_DS
-SDOH_DS = cbind(SDOH_DS, age_col)
-```
-
-```{r}
-## Hometown --------------------------------------------
-# # City ----------------------------------------------------------------
-# city_tbl = as.matrix(table(SDOH_DS$city))
-# city_prop_tbl = prop.table(city_tbl)
-# # ZipCode -------------------------------------------------------------
-# zip_tbl = as.matrix(table(SDOH_DS$zip))
-# zip_prop_tbl = prop.table(city_tbl)
 ```
 
 
-
 ```{r}
-#Has patient been screened in the past year between all teams?----------------------
+##Has patient been screened in the past year between all teams?----------------------
+#This code calculates whether the patient has been screened in the 1 year (365 days) prior to their visit. If so, then we identify this as being "up to date" on screening, which differs from SDOH_DS#sdoh_within_last_12_months. The result of this calculation is added to master datasheet under SDOH_DS$utd_ind, where Y means patient is up to date on screening and N means they are not.
+
 notutd_scrn = 0
 utd_scrn = 0
 null_scrn = 0
 curyr = 0
-dt_scrn_mtrx = matrix(nrow =nrow(SDOH_DS), ncol = 1) #include null responses
-dt_scrn_only = matrix(nrow =nrow(SDOH_DS), ncol = 1) #no null responses
+dt_scrn_mtrx = matrix(nrow =nrow(SDOH_DS), ncol = 1) #table to include null responses, for visualization
+dt_scrn_only = matrix(nrow =nrow(SDOH_DS), ncol = 1) #table doesn't include null responses, for visualization
 utd_ind = matrix(nrow = nrow(SDOH_DS), ncol = 1)
 
+#Calculates if patient is up to date on screening
 for (ii in 1:nrow(SDOH_DS)) {
   dt_scrn = as.Date(SDOH_DS$last_sdoh_complete[ii], format = "%m/%d/%y")
   #enter date into matrix for reference, only month and year
   yr_thrs = as.Date(SDOH_DS$appt_date[ii], format = "%m/%d/%y") - 365 #one year before as threshold for "up to date" screening
-  if (!is.na(dt_scrn)) {
+  if (!is.na(dt_scrn)) { #if patient's SDOH_DS$last_sdoh_complete is not null, calc if screened in last year
       dt_scrn_mtrx[ii] = format(dt_scrn, "%Y-%m")
       dt_scrn_only[ii] = format(dt_scrn, "%Y-%m")
-    # if (dt_scrn >= as.Date("2023-06-01") &
-    #     dt_scrn <= as.Date("2024-05-31")) 
-      if (dt_scrn >= yr_thrs){
-      utd_scrn = utd_scrn + 1
-      utd_ind[ii] = paste("Y")
-    } else{
-      notutd_scrn = notutd_scrn + 1
-      utd_ind[ii] = paste("N")
+      if (dt_scrn >= yr_thrs){ #if last_sdoh_complete is more recent than threshold calulated (yr_thrs), patient is up to date on screening
+        utd_scrn = utd_scrn + 1
+        utd_ind[ii] = paste("Y")
+    } else{ #othwerwise they are not up to date on screening
+        notutd_scrn = notutd_scrn + 1
+        utd_ind[ii] = paste("N")
     }
   }else{
-    #If screen date is null just indicate as null
+    #If screen date is null, indicate as null. Means no last_sdoh_complete date, so patient has never been screened before
     dt_scrn_mtrx[ii] = "NULL"
     utd_ind[ii] = paste("N")
     null_scrn = null_scrn + 1
   }
 }
 
-SDOH_DS = cbind(SDOH_DS, utd_ind) #Master dataset with up to date indicator included
+SDOH_DS = cbind(SDOH_DS, utd_ind) #Add up to date indicator to master dataset
 
-#how many people are up to date on screening----
+#Create table to visualize how many people are up to date on screening----
 utd_tbl= rbind(utd_scrn, notutd_scrn, null_scrn)
 rownames(utd_tbl) = c("Up to Date", "Not Up to Date", "NULL result")
 utd_prop = prop.table(utd_tbl)*100
 colnames(utd_prop) = c("Freq")
 
+#below is a table that does not include NULL responses for our reference only.
 utd_tbl_nonull= rbind(utd_scrn, notutd_scrn)
 rownames(utd_tbl_nonull) = c("Up to Date", "Not Up to Date")
 utd_prop_nonull = prop.table(utd_tbl_nonull)*100
 colnames(utd_prop_nonull) = c("Freq")
 
+#display proportion table of whether patietn is up to date on screening
 utd_prop #tbl showing if patients are up to date on screening, with null
-utd_prop_nonull #tbl showing if pts up to date excluding null results
+# utd_prop_nonull #tbl showing if pts up to date excluding null results
 
-#pie chart visualize up to date
+#pie chart visualize "up to date" screening results
 library(plotly)
 utd_chart <- data.frame("Updated_Screening" = rownames(utd_prop), utd_prop)
 data <- utd_chart[, c('Updated_Screening', 'Freq')]
@@ -490,7 +493,7 @@ fig <- fig %>% layout(title = 'Screening Results ALL TEAMS',
 
 fig
 
-#workthrough to see when most patients had been screened----
+#workthrough to see when most patients had been screened, haven't used this code in a while----
 scrn_frqtbl = as.matrix(table(dt_scrn_only)) #no null responses
 scrn_prptbl = as.matrix(prop.table(scrn_frqtbl)*100)
 null_frqtbl = as.matrix(table(dt_scrn_mtrx)) #include null responses
@@ -534,11 +537,12 @@ pct_null = null_prptbl['NULL',] #outputs percentage of null responses!!!
 
 ```
 ```{r}
-#Insurance payer----
+##Insurance payer----
+#this code looks to see whether patient has public insurance, private insurance, or a combination of both. We add this result to the master datasheet under SDOH_DS#ins_type
+
 ins_tbl = as.matrix(table(SDOH_DS$enc_payer))
 ins_prop_tbl = as.data.frame(prop.table(ins_tbl))
 colnames(ins_prop_tbl) <- c("Prop")
-# ins_prop_tbl_short = filter(ins_prop_tbl, Prop > 0.01) #if more than 1% of patients have a specific insurance, include in new table
 
 #insurance categories
 ins_type = matrix(nrow =nrow(SDOH_DS), ncol = 1)
@@ -653,20 +657,32 @@ exp(coef(screen))
 print("Adjusted p-values")
 p.adjust(summary(screen)$coefficients[, 4], method = "bonferroni")
 ```
-
+```{r}
+#C3 screener responses
+#These are responses to specific areas of need on the screening tool. 
+c3_help = as.matrix(table(SDOH_DS$opt_help)) #Did patient opt in/out for help with their social need?
+c3_housing = as.matrix(table(SDOH_DS$txt_housing_situation)) #Any issues with obtaining housing?
+c3_livingissues_single = as.matrix(table(SDOH_DS$living))
+c3_livingissues_multi = as.matrix(table(SDOH_DS$txt_living_multi)) #on the screener, you can select multiple responses for "living issues." This indicates that the patient reported >1 living issue.
+c3_transportation = as.matrix(table(SDOH_DS$transportation))
+c3_transportation_multi = as.matrix(table(SDOH_DS$transportation_multi)) #on the screener, you can select multiple responses for "transportation issues." This indicates that the patient reported >1 living issue.
+c3_runoutmon4food = as.matrix(table(SDOH_DS$txt_run_out)) #Did patient run out of food before they could buy more
+c3_services = as.matrix(table(SDOH_DS$txt_services)) #did patient need help with utilities
+c3_work = as.matrix(table(SDOH_DS$txt_work)) #Did patient need help with finding work?
+```
 
 ```{r}
 #Screening Status----
+#May not be important but can be looked at. EMR indication of whether screener is complete, incomplete, or not done.
 scrst_tbl = as.matrix(table(SDOH_DS$screen_status))
 scrst_prop_tbl = as.data.frame(prop.table(scrst_tbl))*100
 colnames(scrst_prop_tbl) <- c("Prop")
 ```
 
 
-
-
 ```{r} 
-#Zip----
+#Zip Code----
+#this code looks at most popular zip codes patients report being from.
 zip_cut = as.numeric(substr(SDOH_DS$zip, 1, 4))
 zip_tbl = as.matrix(table(zip_cut))
 zip_prop_tbl = as.data.frame(prop.table(zip_tbl))
@@ -693,18 +709,7 @@ fig <- fig %>% layout(title = 'Most common Zip codes at FHCW',
 fig
 ```
 
-```{r}
-#C3 screener responses
-c3_help = as.matrix(table(SDOH_DS$opt_help))
-c3_housing = as.matrix(table(SDOH_DS$txt_housing_situation))
-c3_livingissues_single = as.matrix(table(SDOH_DS$living))
-c3_livingissues_multi = as.matrix(table(SDOH_DS$txt_living_multi))
-c3_transportation = as.matrix(table(SDOH_DS$transportation))
-c3_transportation_multi = as.matrix(table(SDOH_DS$transportation_multi))
-c3_runoutmon4food = as.matrix(table(SDOH_DS$txt_run_out))
-c3_services = as.matrix(table(SDOH_DS$txt_services))
-c3_work = as.matrix(table(SDOH_DS$txt_work))
-```
+
 
 ```{r}
 #Team 1 patient screening in past year?----------------------
