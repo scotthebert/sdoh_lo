@@ -657,6 +657,7 @@ exp(coef(screen))
 print("Adjusted p-values")
 p.adjust(summary(screen)$coefficients[, 4], method = "bonferroni")
 ```
+
 ```{r}
 #C3 screener responses
 #These are responses to specific areas of need on the screening tool. 
