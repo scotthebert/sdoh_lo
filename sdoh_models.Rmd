@@ -40,11 +40,21 @@ sdoh$city <- as.factor(sdoh$city)
 sdoh$zip <- as.factor(sdoh$zip)
 sdoh$sdoh_within_last_12_months <- as.factor(sdoh$sdoh_within_last_12_months)
 sdoh$screen_status <- as.factor(sdoh$screen_status)
+sdoh$location_name <- as.factor(sdoh$location_name)
+sdoh$appt_date <- as.Date(sdoh$appt_date, format = "%m/%d/%Y")
+sdoh$pt_dob <- as.Date(sdoh$pt_dob, format = "%m/%d/%Y")
+
+# Calculate age by subtracting birth date from appointment date
+sdoh <- sdoh %>% 
+  mutate(age = appt_date - pt_dob)
+sdoh <- sdoh %>% 
+  mutate(age2 = floor(age/365.25))
+sdoh$age2 <- as.double(sdoh$age2)
 ```
 
 ```{r}
 # Simple model
-screen <- glm(sdoh_within_last_12_months ~ current_gender + relevel(race, ref = "White"), family = "binomial", data = sdoh)
+screen <- glm(sdoh_within_last_12_months ~ location_name + age2 + current_gender + relevel(race, ref = "White"), family = "binomial", data = sdoh)
 summary(screen)
 ```
 
