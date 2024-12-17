@@ -29,8 +29,9 @@ library(gtExtras)
 
 #Load data----
 rm(list = ls())
-setwd("/Users/alo/Desktop/UMass/Capstone")
-SDOH_Data= read_csv("SDOH FINAL 01012023 to 05312024.csv") #I renamed the data to be called "FINAL." I will send the CSV and Excel Sheet.
+user <- Sys.getenv("USERNAME")
+ifelse(user == "hebers", setwd("C:/Users/hebers/OneDrive - University Of Massachusetts Medical School/Documents/UMass Projects/sdoh-lo/"), setwd("/Users/alo/Desktop/UMass/Capstone/"))
+SDOH_mtrx= read_csv("SDOH FINAL 01012023 to 05312024.csv") #I renamed the data to be called "FINAL." I will send the CSV and Excel Sheet.
 
 # Adding patient numbers to SDOH_DS --------------------------------------------------
 pt_nbr=nrow(SDOH_Data) #number of patients, ID'ed by number of rows of data
@@ -41,8 +42,8 @@ for (x in 1:pt_nbr){
 SDOH_mtrx = cbind(pt_ID, SDOH_Data) #Master dataset with patient number included
 
 ##Set date range of appointments between 06/01/2023 and 05/31/2024----
-SDOH_mtrx$appt_date = as.Date(SDOH_mtrx$appt_date, format = "%m/%d/%y")
-SDOH_DateCor = SDOH_mtrx[SDOH_mtrx$appt_date >= as.Date("06/01/23", format = "%m/%d/%y"),] #DS with correct date range
+SDOH_mtrx$appt_date = as.Date(SDOH_mtrx$appt_date, format = "%m/%d/%Y")
+SDOH_DateCor = SDOH_mtrx[SDOH_mtrx$appt_date >= as.Date("06/01/2023", format = "%m/%d/%Y"),] #DS with correct date range
 #Datasheet limited to only family practices
 SDOH_DS = SDOH_DateCor[SDOH_DateCor$location_name %in% c('Family Practice 1', 
                                                          'Family Practice 2',
