@@ -34,16 +34,18 @@ ifelse(user == "hebers", setwd("C:/Users/hebers/OneDrive - University Of Massach
 SDOH_mtrx= read_csv("SDOH FINAL 01012023 to 05312024.csv") #I renamed the data to be called "FINAL." I will send the CSV and Excel Sheet.
 
 # Adding patient numbers to SDOH_DS --------------------------------------------------
-pt_nbr=nrow(SDOH_Data) #number of patients, ID'ed by number of rows of data
+pt_nbr=nrow(SDOH_mtrx) #number of patients, ID'ed by number of rows of data
 pt_ID = matrix(nrow = pt_nbr, ncol = 1)
 for (x in 1:pt_nbr){
   pt_ID[x] = paste("P_",x,sep = "")
 }
-SDOH_mtrx = cbind(pt_ID, SDOH_Data) #Master dataset with patient number included
+SDOH_mtrx = cbind(pt_ID, SDOH_mtrx) #Master dataset with patient number included
 
 ##Set date range of appointments between 06/01/2023 and 05/31/2024----
-SDOH_mtrx$appt_date <- as.character(SDOH_mtrx$appt_date, format = "%m/%d/%y")
-SDOH_mtrx$appt_date = as.Date(SDOH_mtrx$appt_date, format = "%m/%d/%y")
+SDOH_mtrx$appt_date <- as.character(SDOH_mtrx$appt_date, format = "%m/%d/%Y")
+SDOH_mtrx$appt_date = as.Date(SDOH_mtrx$appt_date, format = "%m/%d/%Y")
+SDOH_mtrx$pt_dob <- as.character(SDOH_mtrx$pt_dob, format = "%m/%d/%Y")
+SDOH_mtrx$pt_dob <- as.Date(SDOH_mtrx$pt_dob, format = "%m/%d/%Y")
 SDOH_DateCor = SDOH_mtrx[SDOH_mtrx$appt_date >= as.Date("06/01/2023", format = "%m/%d/%Y"),] #DS with correct date range
 #Datasheet limited to only family practices
 SDOH_DS = SDOH_DateCor[SDOH_DateCor$location_name %in% c('Family Practice 1', 
@@ -359,45 +361,68 @@ birthyr_adj = 0
 age_col =  matrix(nrow = nrow(SDOH_DS), ncol = 1)
 
 #Calculates age for each patient in master datasheet
-for (zz in 1:nrow(SDOH_DS)){
-  birthdate = as.Date(SDOH_DS$pt_dob[zz], format = "%m/%d/%y")
-  birthyr = as.numeric(format(birthdate, "%Y"))
-  
-  #As.date function may mistakenly display DOB after 2025 (i.e. "DOB 1/1/65" is displayed as "1/1/2065")
-  # if birth year shows after 2025, subract 100 years to be in 1900s
-  if (birthyr > 2024){
-    birthyr = as.numeric(birthyr - 100)
-  }
+# for (zz in 1:nrow(SDOH_DS)){
+#   birthdate = as.Date(SDOH_DS$pt_dob[zz], format = "%m/%d/%y")
+#   birthyr = as.numeric(format(birthdate, "%Y"))
+#   
+#   #As.date function may mistakenly display DOB after 2025 (i.e. "DOB 1/1/65" is displayed as "1/1/2065")
+#   # if birth year shows after 2025, subract 100 years to be in 1900s
+#   if (birthyr > 2024){
+#     birthyr = as.numeric(birthyr - 100)
+#   }
   
   #Age calculation and adds age to a new column.
-  age = 2024 - birthyr
-  age_col[zz] = age
+  # age = 2024 - birthyr
+  # age_col[zz] = age
+
+
+# NEW AGE CALCULATTION
+# This age calculation is slightly more precise, rounding ages
+# It somewhat accounts for leap years, but not perfectly
+
+SDOH_DS <- SDOH_DS %>% 
+  mutate(age_part1 = appt_date - pt_dob)
+SDOH_DS <- SDOH_DS %>% 
+  mutate(age = floor(age_part1/365.25))
+SDOH_DS$age <- as.double(SDOH_DS$age)
   #Puts patient age into one of 6 commonly reported age brackets.
-  if (age < 5) {
-      inf_ct = inf_ct + 1
-  }else if (age >= 5 && age <20 ){
-      adol_ct = adol_ct + 1
-  }else if (age >= 20 && age <35 ){
-  younga_ct = younga_ct +1
-  }else if (age >= 35 && age <50 ){
-    mida_ct = mida_ct + 1
-  }else if (age >= 50 && age <65 ){
-    older_ct = older_ct + 1
-  }else if (age >= 65 ){
-    geri_ct = geri_ct + 1
-  }else {
-    unk_age_ct = unk_age_ct + 1 #if age is unknown for any NULL edge cases
-  }
-}
+#   if (SDOH_DS$age < 5) {
+#       inf_ct = inf_ct + 1
+#   }else if (SDOH_DS$age >= 5 && SDOH_DS$age <20 ){
+#       adol_ct = adol_ct + 1
+#   }else if (SDOH_DS$age >= 20 && SDOH_DS$age <35 ){
+#   younga_ct = younga_ct +1
+#   }else if (SDOH_DS$age >= 35 && SDOH_DS$age <50 ){
+#     mida_ct = mida_ct + 1
+#   }else if (SDOH_DS$age >= 50 && SDOH_DS$age <65 ){
+#     older_ct = older_ct + 1
+#   }else if (SDOH_DS$age >= 65 ){
+#     geri_ct = geri_ct + 1
+#   }else {
+#     unk_age_ct = unk_age_ct + 1 #if age is unknown for any NULL edge cases
+#   }
+# }
 
 #add age column to SDOH_DS
-SDOH_DS = cbind(SDOH_DS, age_col)
+#SDOH_DS = cbind(SDOH_DS, age_col)
+
+# New age variable
 
 #Creates a table of ages based on age brackets above.
-age_table = rbind(inf_ct, adol_ct, younga_ct, mida_ct, older_ct, geri_ct)
-rownames(age_table) = c("less than 5", "5 - 19", "20 - 34", "35 - 49", "50 - 64", "65 and older")
-age_prop_table = round(prop.table(age_table) * 100, 2)
-colnames(age_prop_table) = c("Percentage")
+
+age_tbl <- SDOH_DS %>% 
+  summarize(`Less than 5` = sum(SDOH_DS$age < 5), 
+            `5 - 19` = sum(SDOH_DS$age >= 5 & SDOH_DS$age < 20), 
+            `20 - 34` = sum(SDOH_DS$age >= 20 & SDOH_DS$age < 35), 
+            `35 - 49` = sum(SDOH_DS$age >= 35 & SDOH_DS$age <50), 
+            `50 - 64` = sum(SDOH_DS$age >= 50 & SDOH_DS$age <65), 
+            `65 and older` = sum(SDOH_DS$age >= 65))
+
+# age_table = rbind(inf_ct, adol_ct, younga_ct, mida_ct, older_ct, geri_ct)
+# rownames(age_table) = c("less than 5", "5 - 19", "20 - 34", "35 - 49", "50 - 64", "65 and older")
+age_prop_table = round(prop.table(age_tbl) * 100, 2)
+colnames(age_prop_table) = c("Percentage less than 5", "Percentage 5 - 19", "Percentage 20 - 34", "Percentage 35 - 49", 
+                             "Percentage 50 - 64", "Percentage 65 and older")
 #prop table of age counts
 
 library(plotly)
