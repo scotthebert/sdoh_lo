@@ -11,7 +11,8 @@ Notes:
   - Otherwise, will have bias
 - Need to determine a method for looking at areas of need
   - What are the independent variables for this?
-    - Likely demographic variables
+    - Likely demographic variables, especially zip code (as a factor variable)
+      - Age, race, language spoken, gender, insurance
 
 
 ```{r}
@@ -50,11 +51,14 @@ sdoh <- sdoh %>%
 sdoh <- sdoh %>% 
   mutate(age2 = floor(age/365.25))
 sdoh$age2 <- as.double(sdoh$age2)
+
+
+SDOH_DS$sdoh_within_last_12_months <- as.factor(SDOH_DS$sdoh_within_last_12_months)
 ```
 
 ```{r}
 # Simple model
-screen <- glm(sdoh_within_last_12_months ~ location_name + age2 + current_gender + relevel(race, ref = "White"), family = "binomial", data = sdoh)
+screen <- glm(sdoh_within_last_12_months ~ location_name + age + current_gender + relevel(as.factor(race), ref = "White"), family = "binomial", data = SDOH_DS)
 summary(screen)
 ```
 
@@ -64,5 +68,9 @@ print("Adjusted odds ratios")
 exp(coef(screen))
 print("Adjusted p-values")
 p.adjust(summary(screen)$coefficients[, 4], method = "bonferroni")
+```
+
+```{r}
+# 
 ```
 
