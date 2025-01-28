@@ -977,3 +977,18 @@ plot(pressure)
 ```
 
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+```{r}
+# Simple model
+screen <- glm(sdoh_within_last_12_months ~ location_name + age + current_gender + relevel(as.factor(race), ref = "White"), family = "binomial", data = SDOH_DS)
+summary(screen)
+```
+
+```{r}
+# Example of adjusted odds ratios and adjusted p-values
+print("Adjusted odds ratios")
+exp(coef(screen))
+print("Adjusted p-values")
+p.adjust(summary(screen)$coefficients[, 4], method = "bonferroni")
+```
+
