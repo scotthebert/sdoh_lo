@@ -43,9 +43,11 @@ SDOH_mtrx = cbind(pt_ID, SDOH_mtrx) #Master dataset with patient number included
 
 ##Set date range of appointments between 06/01/2023 and 05/31/2024----
 SDOH_mtrx$appt_date <- as.character(SDOH_mtrx$appt_date, format = "%m/%d/%Y")
-SDOH_mtrx$appt_date = as.Date(SDOH_mtrx$appt_date, format = "%m/%d/%Y")
+#SDOH_mtrx$appt_date = as.Date(SDOH_mtrx$appt_date, format = "%m/%d/%Y")
+SDOH_mtrx$appt_date = as.Date(SDOH_mtrx$appt_date, format = "%m/%d/%y")#works on Alex's machine weirdly enough
 SDOH_mtrx$pt_dob <- as.character(SDOH_mtrx$pt_dob, format = "%m/%d/%Y")
-SDOH_mtrx$pt_dob <- as.Date(SDOH_mtrx$pt_dob, format = "%m/%d/%Y")
+#SDOH_mtrx$pt_dob <- as.Date(SDOH_mtrx$pt_dob, format = "%m/%d/%Y")
+SDOH_mtrx$pt_dob <- as.Date(SDOH_mtrx$pt_dob, format = "%m/%d/%y")
 SDOH_DateCor = SDOH_mtrx[SDOH_mtrx$appt_date >= as.Date("06/01/2023", format = "%m/%d/%Y"),] #DS with correct date range
 #Datasheet limited to only family practices
 SDOH_DS = SDOH_DateCor[SDOH_DateCor$location_name %in% c('Family Practice 1', 
@@ -93,6 +95,9 @@ census_tbl_rep = rbind(white_row, aa_row, ai_row, asian_row, hpi_row)
 colnames(census_tbl_rep) <- c('Patients')
 census_prop = prop.table(census_tbl_rep)### report this as proportion of patients
 
+census_prop #display proportion table of races at FHCW for only reported responses
+census_tbl_rep #display raw data for races at FHCW
+
 # #try to make a nice table, ignore---
 # census_prop_tbl <- tibble(
 #   name = rownames(census_prop),
@@ -112,7 +117,8 @@ colnames(census_tbl_unrep) <- c('Patients')
 census_prop_unrep = prop.table(census_tbl_unrep)
 pct_unrep = prop.table(census_tbl_unrep)['Unreported/Refused To Report', ]### report this as proportion who did not report race
 
-census_prop #display proportion table of races at FHCW for only reported responses
+census_prop_unrep
+census_tbl_unrep
 
 ##Pie chart visualizing race frequencies
 library(plotly)
@@ -128,27 +134,17 @@ fig <- fig %>% layout(title = 'Race of patients FHCW primary care',
 
 fig
 
-# # pie chart unreported-----
-# ####unreported to be reported in final write up!!
-# race_chart <- data.frame("Race" = rownames(census_prop_unrep), census_prop_unrep) #
-# data <- race_chart[, c('Race', 'Patients')]
-# colors <- c('rgb(211,94,96)', 'rgb(128,133,133)', 'rgb(144,103,167)', 'rgb(171,104,87)', 'rgb(114,147,203)')
-# fig <- plot_ly(data, labels = ~Race, values = ~Patients, type = 'pie')
-# fig <- fig %>% layout(title = 'Race of patients FHCW primary care',
-#                       xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
-#                       yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
-# 
-# fig
+# pie chart unreported-----
+####unreported to be reported in final write up!!
+race_chart <- data.frame("Race" = rownames(census_prop_unrep), census_prop_unrep) #
+data <- race_chart[, c('Race', 'Patients')]
+colors <- c('rgb(211,94,96)', 'rgb(128,133,133)', 'rgb(144,103,167)', 'rgb(171,104,87)', 'rgb(114,147,203)')
+fig <- plot_ly(data, labels = ~Race, values = ~Patients, type = 'pie')
+fig <- fig %>% layout(title = 'Race of patients FHCW primary care',
+                      xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+                      yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
 
-#bar chart----
-# fig <- plot_ly(
-#   x = rownames(census_prop),
-#   y = census_prop[,1],
-#   name = "Race of PT at FHCW primary care",
-#   type = "bar"
-# )
-# 
-# fig
+fig
 
 
 
@@ -331,12 +327,12 @@ colnames(lang_final) = c('Percentage')
 
 library(plotly)
 lang_chart <- data.frame("Language" = rownames(lang_final), lang_final)
-data <- lang_chart[, c('Language', 'Freq')]
+data <- lang_chart[, c('Language', 'Percentage')]
 
 #pie chart reported-----
 colors <- c('rgb(211,94,96)', 'rgb(128,133,133)', 'rgb(144,103,167)', 'rgb(171,104,87)', 'rgb(114,147,203)')
-fig <- plot_ly(data, labels = ~Language, values = ~Freq, type = 'pie')
-fig <- fig %>% layout(title = 'Most popular languages at FHCW',
+fig <- plot_ly(data, labels = ~Language, values = ~Percentage, type = 'pie')
+fig <- fig %>% layout(title = 'Most Common Languages at FHCW',
                       xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
                       yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
 
@@ -563,6 +559,7 @@ pct_null = null_prptbl['NULL',] #outputs percentage of null responses!!!
 # 
 
 ```
+
 ```{r}
 ##Insurance payer----
 #this code looks to see whether patient has public insurance, private insurance, or a combination of both. We add this result to the master datasheet under SDOH_DS#ins_type
@@ -654,7 +651,22 @@ for (p in 1:nrow(SDOH_DS)) {
 SDOH_DS = cbind(SDOH_DS, ins_type)
 ins_type_tbl = as.matrix(table(ins_type))
 ins_type_prop_tbl = prop.table(ins_type_tbl)*100
+colnames(ins_type_prop_tbl) <- c('Patients')
 ins_type_prop_tbl
+
+##Pie chart visualizing most common insurances
+library(plotly)
+ins_chart <- data.frame("Insurance" = rownames(ins_type_prop_tbl), ins_type_prop_tbl)
+data <- ins_chart[, c('Insurance', 'Patients')]
+
+#pie chart reported-----
+colors <- c('rgb(211,94,96)', 'rgb(128,133,133)', 'rgb(144,103,167)', 'rgb(171,104,87)', 'rgb(114,147,203)')
+fig <- plot_ly(data, labels = ~Insurance, values = ~Patients, type = 'pie')
+fig <- fig %>% layout(title = 'Most Common Insurance Classes at FHCW Primary Care',
+                      xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+                      yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+
+fig
 ```
 
 ```{r}
