@@ -452,6 +452,14 @@ fig
 #   mutate(name = factor(name, levels = c("Less than 5", "5 - 19", "20 - 34", "35 - 49", "50 - 64", "65 and older"))) %>%
 #   ggplot(aes(x=name, y=value)) + geom_bar(stat = "identity")
 
+
+age.dat <- as.data.frame(t(age_tbl)) %>% 
+  mutate(`Age Group` = c("Less than 5", "5 - 19", "20 - 34", "35 - 49", 
+                         "50 - 64", "65 and older"), 
+         Percentage = round((V1/sum(V1)) * 100, 1))
+
+age.plot <- ggplot() + 
+  geom_bar(data = age.dat, aes(x = `Age Group`, y = ))
 ```
 
 
@@ -979,6 +987,14 @@ plot(pressure)
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
 
 ```{r}
+# T-test with SDOH screening and C3 FHCW
+sdoh2 <- SDOH_DS %>% 
+  mutate(sdoh_within_last_12_monthsv2 = ifelse(sdoh_within_last_12_months == "Y", 1, 0), 
+         c3v2 = ifelse(c3_enc_ind == "Y", 1, 0))
+t.test(sdoh2$sdoh_within_last_12_monthsv2, sdoh2$c3v2)
+```
+
+```{r}
 # Simple model
 screen <- glm(sdoh_within_last_12_months ~ location_name + age + current_gender + relevel(as.factor(race), ref = "White"), family = "binomial", data = SDOH_DS)
 summary(screen)
@@ -992,3 +1008,25 @@ print("Adjusted p-values")
 p.adjust(summary(screen)$coefficients[, 4], method = "bonferroni")
 ```
 
+```{r}
+# Model with housing situation and food security
+SDOH_DS$sdoh_within_last_12_months <- as.factor(SDOH_DS$sdoh_within_last_12_months)
+hous.food <- glm(sdoh_within_last_12_months ~ txt_housing_situation + txt_run_out, 
+                 family = "binomial", data = SDOH_DS)
+summary(hous.food)
+```
+
+```{r}
+# Model with demographic factors and outcome of housing
+```
+
+- Food insecurity outcome (and other C3 outcomes) should look at zip codes and other demographics
+
+- Add language to simple model, and insurance status (use c3_enc_ind)
+
+- Condense zip codes
+  - Remove 2- or 3-digit zip codes
+  - Add leading 0s to zip codes with 4 digits
+  - Remove the last 4 digits for the 8-digit (really 9-digit) zip codes
+
+- For location, use Team 1 as reference team
