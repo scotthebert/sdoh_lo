@@ -1088,9 +1088,11 @@ SDOH_DS <- SDOH_DS %>%
 SDOH_DS$zip_cond <- as.factor(SDOH_DS$zip_cond)
 ```
 
+# Screening model ---------- 
+
 ```{r}
 # Screening in last 12 months
-screen <- glm(sdoh_within_last_12_months ~ location_name + age + current_gender + relevel(as.factor(race), ref = "White"), eth2, lang2, ins2, zip_cond, family = "binomial", data = SDOH_DS)
+screen <- glm(sdoh_within_last_12_months ~ location_name + age + current_gender + relevel(as.factor(race), ref = "White") + eth2 + lang2 + ins2 + zip_cond, family = "binomial", data = SDOH_DS)
 summary(screen)
 ```
 
@@ -1102,9 +1104,10 @@ print("Adjusted p-values")
 p.adjust(summary(screen)$coefficients[, 4], method = "bonferroni")
 ```
 
+# C3 Models ---------- 
+
 ```{r}
-# Model with housing situation and food security
-SDOH_DS$sdoh_within_last_12_months <- as.factor(SDOH_DS$sdoh_within_last_12_months)
+# Housing situation
 hous.food <- glm(sdoh_within_last_12_months ~ txt_housing_situation + txt_run_out, 
                  family = "binomial", data = SDOH_DS)
 summary(hous.food)
