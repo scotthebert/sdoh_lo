@@ -194,72 +194,87 @@ SDOH_DS <- SDOH_DS %>%
   ))
 SDOH_DS$eth2 <- as.factor(SDOH_DS$eth2)
 
-#freq table of ethnicity responses
-eth_tbl = as.matrix(table(SDOH_DS$ethnicity))
-eth_prop_tbl = prop.table(eth_tbl)
-colnames(eth_prop_tbl) <- c("Freq")
-
-eth_df = as.data.frame(eth_tbl) #probably unnecessarily making matrix into a dataframe
-colnames(eth_df) = "Freq"
-lang_nbr=nrow(eth_df)
-hs_n_ct = 0 #"not hispanic" count
-hs_y_ct = 0 #"hispanic" count
-hs_unrep_ct = 0 #"did not report" ethnicity count
-his_col = matrix(nrow = nrow(SDOH_DS), ncol = 1) #column for ethnicity responses to be added to SDOH_DS
-
-#Adds a column to SDOH_DS that reports if patient was hispanic or latino. Also counts frequency of responses to "ethnicity."
-for (i in 1:lang_nbr) {
-  current_row = rownames(eth_df)[i]
-  if (grepl("Not Hispanic",current_row)) {
-    hs_n_ct = hs_n_ct + eth_df[i, "Freq"]
-    his_col[i] = paste('Not Hispanic')
-  }else if (grepl("Unreported",current_row)) {
-    hs_unrep_ct = hs_unrep_ct + eth_df[i, "Freq"]
-    his_col[i] = paste('Unreported')
-  } 
-  else{
-    hs_y_ct = hs_y_ct + eth_df[i, "Freq"]
-    his_col[i] = paste('Hispanic/ Latino')
-  }
-}
-#Add ethnicity column to SDOH_DS
-SDOH_DS = cbind(SDOH_DS, his_col)
-
-#Table of responses, aligned with Census options
-hs_yn = matrix(
-  c(hs_y_ct, hs_n_ct, hs_unrep_ct),
-  nrow = 3,
-  ncol = 1
-  )
-rownames(hs_yn) = c("Hispanic", "Not Hispanic", "Unreported")
-colnames(hs_yn) = c("pts")
-
+eth2 = as.matrix(table(SDOH_DS$eth2)) #raw count of each option
+eth2_tbl = prop.table(eth2) #proportion table of ethnicity options
+colnames(eth2_tbl) <- c("Freq")
 
 #pie chart if report hispanic or not per census options
-eth_chart <- data.frame("Ethnicity" = rownames(hs_yn), hs_yn)
-data <- eth_chart[, c('Ethnicity', 'pts')]
+eth_chart <- data.frame("Ethnicity" = rownames(eth2_tbl), eth2_tbl)
+data <- eth_chart[, c('Ethnicity', 'Freq')]
 colors <- c('rgb(211,94,96)', 'rgb(128,133,133)', 'rgb(144,103,167)', 'rgb(171,104,87)', 'rgb(114,147,203)')
-fig <- plot_ly(data, labels = ~Ethnicity, values = ~pts, type = 'pie')
+fig <- plot_ly(data, labels = ~Ethnicity, values = ~Freq, type = 'pie')
 fig <- fig %>% layout(title = 'Ethnicity of patients FHCW primary care',
                       xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
                       yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
 
 fig
 
-##Breakdown of hispanic/Latino to specific nationalities, which were options in EMR-----
-#quantified out of curiosity. Will likely not include in final reports.
-hl_ct = eth_tbl['Hispanic, Latino/a, Spanish Origin, Combined',] + eth_tbl['Hispanic or Latino',]
-hl_row = cbind(hl_ct, row.names('Hispanic or Latino'))
-cuban_row = cbind(eth_tbl['Cuban', ], row.names('Cuban'))
-other_row = cbind(eth_tbl['Another Hispanic, Latino/a, or Spanish Origin', ], row.names('Another Hispanic, Latino/a, or Spanish Origin'))
-pr_row = cbind(eth_tbl['Puerto Rican', ], row.names('Puerto Rican'))
-mex_row = cbind(eth_tbl['Mexican, Mexican American, Chicano/a', ], row.names('Mexican, Mexican American, Chicano/a'))
-hisp_tbl = rbind(hl_row, cuban_row, pr_row, mex_row, other_row)
-hisp_prop = prop.table(hisp_tbl)
+# #freq table of ethnicity responses
+# eth_tbl = as.matrix(table(SDOH_DS$ethnicity))
+# eth_prop_tbl = prop.table(eth_tbl)
+# colnames(eth_prop_tbl) <- c("Freq")
+# 
+# eth_df = as.data.frame(eth_tbl) #probably unnecessarily making matrix into a dataframe
+# colnames(eth_df) = "Freq"
+# lang_nbr=nrow(eth_df)
+# hs_n_ct = 0 #"not hispanic" count
+# hs_y_ct = 0 #"hispanic" count
+# hs_unrep_ct = 0 #"did not report" ethnicity count
+# his_col = matrix(nrow = nrow(SDOH_DS), ncol = 1) #column for ethnicity responses to be added to SDOH_DS
+# 
+# #Adds a column to SDOH_DS that reports if patient was hispanic or latino. Also counts frequency of responses to "ethnicity."
+# for (i in 1:lang_nbr) {
+#   current_row = rownames(eth_df)[i]
+#   if (grepl("Not Hispanic",current_row)) {
+#     hs_n_ct = hs_n_ct + eth_df[i, "Freq"]
+#     his_col[i] = paste('Not Hispanic')
+#   }else if (grepl("Unreported",current_row)) {
+#     hs_unrep_ct = hs_unrep_ct + eth_df[i, "Freq"]
+#     his_col[i] = paste('Unreported')
+#   } 
+#   else{
+#     hs_y_ct = hs_y_ct + eth_df[i, "Freq"]
+#     his_col[i] = paste('Hispanic/ Latino')
+#   }
+# }
+# #Add ethnicity column to SDOH_DS
+# SDOH_DS = cbind(SDOH_DS, his_col)
+# 
+# #Table of responses, aligned with Census options
+# hs_yn = matrix(
+#   c(hs_y_ct, hs_n_ct, hs_unrep_ct),
+#   nrow = 3,
+#   ncol = 1
+#   )
+# rownames(hs_yn) = c("Hispanic", "Not Hispanic", "Unreported")
+# colnames(hs_yn) = c("pts")
+# 
+# 
+# #pie chart if report hispanic or not per census options
+# eth_chart <- data.frame("Ethnicity" = rownames(hs_yn), hs_yn)
+# data <- eth_chart[, c('Ethnicity', 'pts')]
+# colors <- c('rgb(211,94,96)', 'rgb(128,133,133)', 'rgb(144,103,167)', 'rgb(171,104,87)', 'rgb(114,147,203)')
+# fig <- plot_ly(data, labels = ~Ethnicity, values = ~pts, type = 'pie')
+# fig <- fig %>% layout(title = 'Ethnicity of patients FHCW primary care',
+#                       xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+#                       yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+# 
+# fig
 
-#Display the hispanic frequency table and proporiton table, according to census options
-hs_yn #hispanic yes/no table
-hisp_prop #breakdown of hispanic
+# ##Breakdown of hispanic/Latino to specific nationalities, which were options in EMR-----
+# #quantified out of curiosity. Will likely not include in final reports.
+# hl_ct = eth_tbl['Hispanic, Latino/a, Spanish Origin, Combined',] + eth_tbl['Hispanic or Latino',]
+# hl_row = cbind(hl_ct, row.names('Hispanic or Latino'))
+# cuban_row = cbind(eth_tbl['Cuban', ], row.names('Cuban'))
+# other_row = cbind(eth_tbl['Another Hispanic, Latino/a, or Spanish Origin', ], row.names('Another Hispanic, Latino/a, or Spanish Origin'))
+# pr_row = cbind(eth_tbl['Puerto Rican', ], row.names('Puerto Rican'))
+# mex_row = cbind(eth_tbl['Mexican, Mexican American, Chicano/a', ], row.names('Mexican, Mexican American, Chicano/a'))
+# hisp_tbl = rbind(hl_row, cuban_row, pr_row, mex_row, other_row)
+# hisp_prop = prop.table(hisp_tbl)
+
+# #Display the hispanic frequency table and proporiton table, according to census options
+# hs_yn #hispanic yes/no table
+# hisp_prop #breakdown of hispanic
 ```
 
 ```{r}
