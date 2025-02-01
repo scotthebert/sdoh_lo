@@ -178,6 +178,22 @@ SDOH_DS = cbind(SDOH_DS, crace_col) #Add Census race column to master dataset
 # "Ethnicity" means if patient has hispanic or latino origin, per census options. Adds a new column to master datasheet to be aligned with census options under "SDOH_DS$his_col"
 # I apologize as this code is not straightforward, was one of my first attempts at refreshing my R skills
 
+# New variable for simplified ethnicity
+SDOH_DS <- SDOH_DS %>% 
+  mutate(eth2 = case_when(
+    ethnicity == "Another Hispanic, Latino/a, or Spanish Origin" ~ "Hispanic",
+    ethnicity == "Cuban" ~ "Hispanic",
+    ethnicity == "Hispanic or Latino" ~ "Hispanic",
+    ethnicity == "Hispanic, Latino/a, Spanish Origin, Combined" ~ "Hispanic",
+    ethnicity == "Mexican, Mexican American, Chicano/a" ~ "Hispanic",
+    ethnicity == "Puerto Rican" ~ "Hispanic",
+    ethnicity == "Not Hispanic or Latino" ~ "Not Hispanic",
+    ethnicity == "Not Hispanic, Latino/a, or Spanish Origin" ~ "Not Hispanic",
+    ethnicity == "Unknown / Not Reported" ~ "Not Reported",
+    ethnicity == "Unreported/Chose Not to Disclose Ethnicity" ~ "Not Reported"
+  ))
+SDOH_DS$eth2 <- as.factor(SDOH_DS$eth2)
+
 #freq table of ethnicity responses
 eth_tbl = as.matrix(table(SDOH_DS$ethnicity))
 eth_prop_tbl = prop.table(eth_tbl)
@@ -447,6 +463,28 @@ fig
 #   mutate(name = factor(name, levels = c("Less than 5", "5 - 19", "20 - 34", "35 - 49", "50 - 64", "65 and older"))) %>%
 #   ggplot(aes(x=name, y=value)) + geom_bar(stat = "identity")
 
+
+age.dat <- as.data.frame(t(age_tbl)) %>% 
+  mutate(`Age Group` = c("Less than 5", "5 - 19", "20 - 34", "35 - 49", 
+                         "50 - 64", "65 and older"), 
+         Percentage = round((V1/sum(V1)) * 100, 1))
+
+age.dat$`Age Group` <- factor(age.dat$`Age Group`, levels = c("Less than 5", 
+                                                              "5 - 19", 
+                                                              "20 - 34", 
+                                                              "35 - 49", 
+                                                              "50 - 64", 
+                                                              "65 and older"))
+
+age.plot <- ggplot(data = age.dat, aes(x = "", y = V1, fill = `Age Group`)) + 
+  geom_bar(stat = "identity", width = 1) + 
+  coord_polar(theta = "y", start = 0, direction = -1) + 
+  geom_text(aes(label = paste0(Percentage, "%")), 
+            position = position_stack(vjust = 0.5)) + 
+  ggtitle("Patient Age") + 
+  theme_void()
+
+age.plot
 ```
 
 
@@ -990,16 +1028,95 @@ plot(pressure)
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
 
 ```{r}
-# Simple model
-screen <- glm(sdoh_within_last_12_months ~ location_name + age + current_gender + relevel(as.factor(race), ref = "White"), family = "binomial", data = SDOH_DS)
+# T-test with SDOH screening and C3 FHCW
+sdoh2 <- SDOH_DS %>% 
+  mutate(sdoh_within_last_12_monthsv2 = ifelse(sdoh_within_last_12_months == "Y", 1, 0), 
+         c3v2 = ifelse(c3_enc_ind == "Y", 1, 0))
+t.test(sdoh2$sdoh_within_last_12_monthsv2, sdoh2$c3v2)
+```
+
+```{r}
+# Modifying some more data
+
+# Language
+SDOH_DS <- SDOH_DS %>% 
+  mutate(lang2 = ifelse(pt_language == "English", "English", "Other/unknown language"))
+SDOH_DS$lang2 <- as.factor(SDOH_DS$lang2)
+
+# Insurance status
+SDOH_DS <- SDOH_DS %>% 
+  mutate(ins2 = ifelse(enc_payer == "MH C3 FHCW", "MH C3 FHCW", 
+                       ifelse(enc_payer == "NULL", "NULL", "Not MH C3 FHCW")))
+SDOH_DS$ins2 <- as.factor(SDOH_DS$ins2)
+```
+
+```{r}
+# Zip code mutation needs its own chunk, because wow
+SDOH_DS <- SDOH_DS %>% 
+  mutate(zip2 = NULL)
+
+SDOH_DS$zip <- as.character(SDOH_DS$zip)
+
+for(i in 1:nrow(SDOH_DS)){
+  SDOH_DS$zip2[i] = ifelse(nchar(SDOH_DS$zip[i]) == 9, substr(SDOH_DS$zip[i], 1, 5), 
+                            ifelse(nchar(SDOH_DS$zip[i]) == 8, paste0("0", substr(SDOH_DS$zip[i], 1, 4)), 
+                                   ifelse(nchar(SDOH_DS$zip[i]) == 5, SDOH_DS$zip[i], 
+                                          ifelse(nchar(SDOH_DS$zip[i]) == 4, paste0("0", SDOH_DS$zip[i]), 
+                                                 "NULL"))))
+}
+
+SDOH_DS$zip2 <- as.factor(SDOH_DS$zip2)
+
+# For testing
+test.zip <- SDOH_DS %>% 
+  select(zip, zip2)
+test.zip2 <- test.zip %>% 
+  filter(nchar(zip) > 5)
+
+# Condensing 
+SDOH_DS <- SDOH_DS %>% 
+  mutate(zip_cond = case_when(
+    zip2 == "01610" ~ "01610",
+    zip2 == "01604" ~ "01604",
+    zip2 == "01603" ~ "01603",
+    zip2 == "01605" ~ "01605",
+    zip2 == "01609" ~ "01609",
+    zip2 == "01602" ~ "01602",
+    .default = "Other/Unknown"
+  ))
+SDOH_DS$zip_cond <- as.factor(SDOH_DS$zip_cond)
+```
+
+# Screening model ---------- 
+
+```{r}
+# Screening in last 12 months
+screen <- glm(sdoh_within_last_12_months ~ location_name + age + current_gender + relevel(as.factor(race), ref = "White") + eth2 + lang2 + ins2 + zip_cond, family = "binomial", data = SDOH_DS)
 summary(screen)
 ```
 
 ```{r}
-# Example of adjusted odds ratios and adjusted p-values
+# Screening in last 12 months, adjusted odds ratios and adjusted p-values
 print("Adjusted odds ratios")
 exp(coef(screen))
 print("Adjusted p-values")
 p.adjust(summary(screen)$coefficients[, 4], method = "bonferroni")
 ```
 
+# C3 Models ---------- 
+
+```{r}
+# Housing situation
+hous.food <- glm(sdoh_within_last_12_months ~ txt_housing_situation + txt_run_out, 
+                 family = "binomial", data = SDOH_DS)
+summary(hous.food)
+```
+
+```{r}
+# Model with demographic factors and outcome of housing
+```
+
+
+- Ensure insurance status is condensed correctly
+
+- Condense zip codes
