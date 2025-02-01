@@ -44,10 +44,9 @@ SDOH_mtrx = cbind(pt_ID, SDOH_mtrx) #Master dataset with patient number included
 ##Set date range of appointments between 06/01/2023 and 05/31/2024----
 SDOH_mtrx$appt_date <- as.character(SDOH_mtrx$appt_date, format = "%m/%d/%Y")
 SDOH_mtrx$appt_date = as.Date(SDOH_mtrx$appt_date, format = "%m/%d/%Y")
-#SDOH_mtrx$appt_date = as.Date(SDOH_mtrx$appt_date, format = "%m/%d/%y")#works on Alex's machine weirdly enough
 SDOH_mtrx$pt_dob <- as.character(SDOH_mtrx$pt_dob, format = "%m/%d/%Y")
 SDOH_mtrx$pt_dob <- as.Date(SDOH_mtrx$pt_dob, format = "%m/%d/%Y")
-#SDOH_mtrx$pt_dob <- as.Date(SDOH_mtrx$pt_dob, format = "%m/%d/%y")
+
 SDOH_DateCor = SDOH_mtrx[SDOH_mtrx$appt_date >= as.Date("06/01/2023", format = "%m/%d/%Y"),] #DS with correct date range
 #Datasheet limited to only family practices
 SDOH_DS = SDOH_DateCor[SDOH_DateCor$location_name %in% c('Family Practice 1', 
