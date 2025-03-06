@@ -1063,6 +1063,105 @@ SDOH_DS <- SDOH_DS %>%
   mutate(ins2 = ifelse(enc_payer == "MH C3 FHCW", "MH C3 FHCW", 
                        ifelse(enc_payer == "NULL", "NULL", "Not MH C3 FHCW")))
 SDOH_DS$ins2 <- as.factor(SDOH_DS$ins2)
+
+# Basic cleaning of C3 questions
+SDOH_DS$txt_housing_situation <- ifelse(grepl("NOT COMLETED", SDOH_DS$txt_housing_situation) | 
+                                          grepl("not comleted", SDOH_DS$txt_housing_situation) | 
+                                          grepl("NOT COMPLETED", SDOH_DS$txt_housing_situation) | 
+                                          grepl("not completed", SDOH_DS$txt_housing_situation) | 
+                                          grepl("NOT COMPLATED", SDOH_DS$txt_housing_situation) | 
+                                          grepl("not complated", SDOH_DS$txt_housing_situation) | 
+                                          grepl("not done", SDOH_DS$txt_housing_situation) | 
+                                          grepl("NOT FINISHED", SDOH_DS$txt_housing_situation), 
+                                        "NULL", SDOH_DS$txt_housing_situation)
+
+# Living situation issues
+SDOH_DS$txt_living_multi <- ifelse(SDOH_DS$txt_living_multi == "No", "None of the above", 
+                                   ifelse(SDOH_DS$txt_living_multi == "N/A" | 
+                                          SDOH_DS$txt_living_multi == "Not completed", "NULL", SDOH_DS$txt_living_multi))
+
+# Worried about running out of food
+SDOH_DS$txt_run_out <- ifelse(SDOH_DS$txt_run_out == "NOT COMLETED", "NULL", SDOH_DS$txt_run_out)
+
+# Transportation issues
+SDOH_DS$transportation_multi <- ifelse(SDOH_DS$transportation_multi == "non", "No", SDOH_DS$transportation_multi)
+
+# Finding work
+SDOH_DS$txt_work <- ifelse(SDOH_DS$txt_work == "Student" | 
+                             SDOH_DS$txt_work == "Place to live per pt's answer" | 
+                             SDOH_DS$txt_work == "NOT COMLETED", "NULL", SDOH_DS$txt_work)
+```
+
+```{r}
+# C3 responses -- binarize
+
+# Housing
+SDOH_DS <- SDOH_DS %>% 
+  mutate(hous2 = ifelse(grepl("I have housing", SDOH_DS$txt_housing_situation), 1,
+                        ifelse(grepl("I am not sure", SDOH_DS$txt_housing_situation), 0,
+                        ifelse(grepl("I do not have housing", SDOH_DS$txt_housing_situation), 0, NA))))
+
+# Issues with housing
+SDOH_DS <- SDOH_DS %>% 
+  mutate(pests = ifelse(grepl("Pests", SDOH_DS$txt_living_multi), 1, 
+                         ifelse(SDOH_DS$txt_living_multi == "NULL", NA, 0)), 
+         mold = ifelse(grepl("Mold", SDOH_DS$txt_living_multi), 1, 
+                       ifelse(SDOH_DS$txt_living_multi == "NULL", NA, 0)), 
+         lead = ifelse(grepl("Lead", SDOH_DS$txt_living_multi), 1, 
+                       ifelse(SDOH_DS$txt_living_multi == "NULL", NA, 0)), 
+         inad_heat = ifelse(grepl("Inadequate", SDOH_DS$txt_living_multi), 1, 
+                            ifelse(SDOH_DS$txt_living_multi == "NULL", NA, 0)), 
+         oven = ifelse(grepl("Oven", SDOH_DS$txt_living_multi), 1, 
+                       ifelse(SDOH_DS$txt_living_multi == "NULL", NA, 0)), 
+         smoke = ifelse(grepl("smoke", SDOH_DS$txt_living_multi), 1, 
+                        ifelse(SDOH_DS$txt_living_multi == "NULL", NA, 0)), 
+         water = ifelse(grepl("Water", SDOH_DS$txt_living_multi), 1, 
+                        ifelse(SDOH_DS$txt_living_multi == "NULL", NA, 0)), 
+         no_issues = ifelse(grepl("None of the above", SDOH_DS$txt_living_multi), 1, 
+                            ifelse(SDOH_DS$txt_living_multi == "NULL", NA, 0)), 
+         unsure = ifelse(grepl("I am not sure", SDOH_DS$txt_living_multi), 1, 
+                         ifelse(SDOH_DS$txt_living_multi == "NULL", NA, 0))) %>% 
+  mutate(any_issues = ifelse(pests == 1 | mold == 1 | lead == 1 | inad_heat == 1 | 
+                               oven == 1 | smoke == 1 | water == 1, 1, 
+                             ifelse(SDOH_DS$txt_living_multi == "NULL", NA, 0)))
+
+# Food worries
+SDOH_DS <- SDOH_DS %>% 
+  mutate(food_worries = ifelse(SDOH_DS$txt_run_out == "Often true" | SDOH_DS$txt_run_out == 
+                                 "Sometimes true", 1, 
+                               ifelse(SDOH_DS$txt_run_out == "NULL", NA, 0)))
+
+# Food running out
+SDOH_DS <- SDOH_DS %>% 
+  mutate(food_runout = ifelse(SDOH_DS$txt_didnt_last == "Often true" | SDOH_DS$txt_didnt_last == 
+                                "Sometimes true", 1, 
+                              ifelse(SDOH_DS$txt_didnt_last == "NULL", NA, 0)))
+
+# Transportation
+SDOH_DS <- SDOH_DS %>% 
+  mutate(tyesmed = ifelse(grepl("from medical", SDOH_DS$transportation_multi), 1, 
+                         ifelse(SDOH_DS$transportation_multi == "NULL", NA, 0)), 
+         tyesnomed = ifelse(grepl("from non-medical", SDOH_DS$transportation_multi), 1, 
+                         ifelse(SDOH_DS$transportation_multi == "NULL", NA, 0)), 
+         tno = ifelse(grepl("No", SDOH_DS$transportation_multi), 1, 
+                         ifelse(SDOH_DS$transportation_multi == "NULL", NA, 0)), 
+         tnotsure = ifelse(grepl("I am not sure", SDOH_DS$transportation_multi), 1, 
+                         ifelse(SDOH_DS$transportation_multi == "NULL", NA, 0)))
+SDOH_DS <- SDOH_DS %>% 
+  mutate(anyt = ifelse(SDOH_DS$tyesmed == 1 | SDOH_DS$tyesnomed == 1, 1, 
+                       ifelse(SDOH_DS$transportation_multi == "NULL", NA, 0)))
+
+# Services shut off
+SDOH_DS <- SDOH_DS %>% 
+  mutate(shutoff = ifelse(SDOH_DS$txt_services == "Already shut off" | 
+                            SDOH_DS$txt_services == "Already shut off-Gas" | 
+                            SDOH_DS$txt_services == "Yes", 1, 
+                          ifelse(SDOH_DS$txt_services == "NULL", NA, 0)))
+
+# Help finding work
+SDOH_DS <- SDOH_DS %>% 
+  mutate(helpwork = ifelse(grepl("Yes", SDOH_DS$txt_work), 1, 
+                           ifelse(SDOH_DS$txt_work == "NULL", NA, 0)))
 ```
 
 ```{r}
@@ -1135,3 +1234,5 @@ summary(hous.food)
 - Ensure insurance status is condensed correctly
 
 - Condense zip codes
+
+- Check how C3 responses are collected, as there are some multiples and impossible combinations of answers
