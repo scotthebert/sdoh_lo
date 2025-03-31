@@ -31,23 +31,19 @@ library(gtExtras)
 rm(list = ls())
 user <- Sys.getenv("USERNAME")
 ifelse(user == "hebers", setwd("C:/Users/hebers/OneDrive - University Of Massachusetts Medical School/Documents/UMass Projects/sdoh-lo/"), setwd("/Users/alo/Desktop/UMass/Capstone/"))
-SDOH_mtrx= read_csv("SDOH FINAL 01012023 to 05312024.csv") #I renamed the data to be called "FINAL." I will send the CSV and Excel Sheet.
+SDOH_mtrx= read_csv("SDOH-032426_FINAL.csv") #I renamed the data to be called "FINAL." I will send the CSV and Excel Sheet.
 
-# Adding patient numbers to SDOH_DS --------------------------------------------------
-pt_nbr=nrow(SDOH_mtrx) #number of patients, ID'ed by number of rows of data
-pt_ID = matrix(nrow = pt_nbr, ncol = 1)
-for (x in 1:pt_nbr){
-  pt_ID[x] = paste("P_",x,sep = "")
-}
-SDOH_mtrx = cbind(pt_ID, SDOH_mtrx) #Master dataset with patient number included
-
+SDOH_mtrx$med_rec_nbr <- as.factor(SDOH_mtrx$med_rec_nbr)
 ##Set date range of appointments between 06/01/2023 and 05/31/2024----
-SDOH_mtrx$appt_date <- as.character(SDOH_mtrx$appt_date, format = "%m/%d/%Y")
-SDOH_mtrx$appt_date = as.Date(SDOH_mtrx$appt_date, format = "%m/%d/%Y")
-SDOH_mtrx$pt_dob <- as.character(SDOH_mtrx$pt_dob, format = "%m/%d/%Y")
+SDOH_mtrx$appt_date = as.Date(SDOH_mtrx$appt_date, format = "%m/%d/%y")
 SDOH_mtrx$pt_dob <- as.Date(SDOH_mtrx$pt_dob, format = "%m/%d/%Y")
 
 SDOH_DateCor = SDOH_mtrx[SDOH_mtrx$appt_date >= as.Date("06/01/2023", format = "%m/%d/%Y"),] #DS with correct date range
+
+# Keeping only most recent visit for each patient
+SDOH_DateCor <- SDOH_DateCor %>% 
+  arrange(desc(pt_dob)) %>% 
+  distinct(med_rec_nbr, .keep_all = TRUE)
 #Datasheet limited to only family practices
 SDOH_DS = SDOH_DateCor[SDOH_DateCor$location_name %in% c('Family Practice 1', 
                                                          'Family Practice 2',
@@ -329,7 +325,7 @@ male_ct = gender_tbl['Male',] + unr_male
 #
 transgender_ct = gender_tbl['Female-to-Male (FTM)/Transgender Male/Trans Man',] + gender_tbl['Male-to-Female (MTF)/Transgender Female/Trans Woman', ]
 
-other_gender_ct = gender_tbl['Genderqueer, neither exclusively male nor female',] + gender_tbl['Additional gender category or other, please specify', ]
+other_gender_ct = gender_tbl['Genderqueer, neither exclusively male nor female',]
 
 #Table of reported genders, including undisclosed
 gender_tbl_adj = rbind(male_ct, female_ct, transgender_ct, other_gender_ct, unreported_gender)
@@ -406,6 +402,7 @@ age_col =  matrix(nrow = nrow(SDOH_DS), ncol = 1)
 # This age calculation is slightly more precise, rounding ages
 # It somewhat accounts for leap years, but not perfectly
 
+SDOH_DS <- data.frame(SDOH_DS)
 SDOH_DS <- SDOH_DS %>% 
   mutate(age_part1 = appt_date - pt_dob)
 SDOH_DS <- SDOH_DS %>% 
@@ -1053,6 +1050,13 @@ t.test(sdoh2$sdoh_within_last_12_monthsv2, sdoh2$c3v2)
 ```{r}
 # Modifying some more data
 
+# Screening
+SDOH_DS <- SDOH_DS %>% 
+  mutate(sdoh12months = ifelse(sdoh_within_last_12_months == "Y", 1, 0))
+
+# Location
+SDOH_DS$location_name <- as.factor(SDOH_DS$location_name)
+
 # Language
 SDOH_DS <- SDOH_DS %>% 
   mutate(lang2 = ifelse(pt_language == "English", "English", "Other/unknown language"))
@@ -1205,7 +1209,7 @@ SDOH_DS$zip_cond <- as.factor(SDOH_DS$zip_cond)
 
 ```{r}
 # Screening in last 12 months
-screen <- glm(sdoh_within_last_12_months ~ location_name + age + current_gender + relevel(as.factor(race), ref = "White") + eth2 + lang2 + ins2 + zip_cond, family = "binomial", data = SDOH_DS)
+screen <- glm(sdoh12months ~ location_name + age + current_gender + relevel(as.factor(race), ref = "White") + eth2 + lang2 + ins2 + zip_cond, family = "binomial", data = SDOH_DS)
 summary(screen)
 ```
 
@@ -1221,7 +1225,7 @@ p.adjust(summary(screen)$coefficients[, 4], method = "bonferroni")
 
 ```{r}
 # Housing situation
-hous.food <- glm(sdoh_within_last_12_months ~ txt_housing_situation + txt_run_out, 
+hous.food <- glm(sdoh12months ~ hous2 + food_worries, 
                  family = "binomial", data = SDOH_DS)
 summary(hous.food)
 ```
