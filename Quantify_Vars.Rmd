@@ -1231,7 +1231,80 @@ summary(hous.food)
 ```
 
 ```{r}
-# Model with demographic factors and outcome of housing
+# Housing situation
+c3.hous <- glm(hous2 ~ zip_cond + census_race + eth2 + lang2 + gender_col + ins2, 
+               family = "binomial", data = SDOH_DS)
+summary(c3.hous)
+print("Adjusted odds ratios")
+exp(coef(c3.hous))
+print("Adjusted p-values")
+p.adjust(summary(c3.hous)$coefficients[, 4], method = "BH")
+```
+
+```{r}
+# Issues with housing
+c3.issues <- glm(any_issues ~ zip_cond + census_race + eth2 + lang2 + gender_col + ins2, 
+               family = "binomial", data = SDOH_DS)
+summary(c3.issues)
+print("Adjusted odds ratios")
+exp(coef(c3.issues))
+print("Adjusted p-values")
+p.adjust(summary(c3.issues)$coefficients[, 4], method = "BH")
+```
+
+```{r}
+# Food worries
+c3.foodworries <- glm(food_worries ~ zip_cond + census_race + eth2 + lang2 + gender_col + ins2, 
+               family = "binomial", data = SDOH_DS)
+summary(c3.foodworries)
+print("Adjusted odds ratios")
+exp(coef(c3.foodworries))
+print("Adjusted p-values")
+p.adjust(summary(c3.foodworries)$coefficients[, 4], method = "BH")
+```
+
+```{r}
+# Food running out
+c3.foodrunout <- glm(food_runout ~ zip_cond + census_race + eth2 + lang2 + gender_col + ins2, 
+               family = "binomial", data = SDOH_DS)
+summary(c3.foodrunout)
+print("Adjusted odds ratios")
+exp(coef(c3.foodrunout))
+print("Adjusted p-values")
+p.adjust(summary(c3.foodrunout)$coefficients[, 4], method = "BH")
+```
+
+```{r}
+# Transportation issues
+c3.transportation <- glm(anyt ~ zip_cond + census_race + eth2 + lang2 + gender_col + ins2, 
+               family = "binomial", data = SDOH_DS)
+summary(c3.transportation)
+print("Adjusted odds ratios")
+exp(coef(c3.transportation))
+print("Adjusted p-values")
+p.adjust(summary(c3.transportation)$coefficients[, 4], method = "BH")
+```
+
+```{r}
+# Services shut off
+c3.services <- glm(shutoff ~ zip_cond + census_race + eth2 + lang2 + gender_col + ins2, 
+               family = "binomial", data = SDOH_DS)
+summary(c3.services)
+print("Adjusted odds ratios")
+exp(coef(c3.services))
+print("Adjusted p-values")
+p.adjust(summary(c3.services)$coefficients[, 4], method = "BH")
+```
+
+```{r}
+# Help with work
+c3.work <- glm(helpwork ~ zip_cond + census_race + eth2 + lang2 + gender_col + ins2, 
+               family = "binomial", data = SDOH_DS)
+summary(c3.work)
+print("Adjusted odds ratios")
+exp(coef(c3.work))
+print("Adjusted p-values")
+p.adjust(summary(c3.work)$coefficients[, 4], method = "BH")
 ```
 
 
