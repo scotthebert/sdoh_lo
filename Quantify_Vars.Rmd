@@ -26,6 +26,7 @@ library(tidyverse)
 library(dplyr)
 library(gt)
 library(gtExtras)
+library(car)
 
 #Load data----
 rm(list = ls())
@@ -1205,7 +1206,7 @@ SDOH_DS <- SDOH_DS %>%
 SDOH_DS$zip_cond <- as.factor(SDOH_DS$zip_cond)
 ```
 
-# Screening model ---------- 
+# Screening model
 
 ```{r}
 # Screening in last 12 months
@@ -1221,14 +1222,7 @@ print("Adjusted p-values")
 p.adjust(summary(screen)$coefficients[, 4], method = "bonferroni")
 ```
 
-# C3 Models ---------- 
-
-```{r}
-# Housing situation
-hous.food <- glm(sdoh12months ~ hous2 + food_worries, 
-                 family = "binomial", data = SDOH_DS)
-summary(hous.food)
-```
+# C3 Models
 
 ```{r}
 # Housing situation
@@ -1305,6 +1299,26 @@ print("Adjusted odds ratios")
 exp(coef(c3.work))
 print("Adjusted p-values")
 p.adjust(summary(c3.work)$coefficients[, 4], method = "BH")
+```
+
+# Model regarding finishing the screener
+
+```{r}
+# Model regarding finishing the screener
+
+# Data transformation
+finish.data <- SDOH_DS %>% 
+  mutate(screen_status_bin = ifelse(screen_status == "Complete", 1, 
+                                    ifelse(screen_status == "Incomplete", 0, NA)))
+
+# Model
+finish.screener <- glm(screen_status_bin ~ age + census_race + eth2 + lang2 + gender_col + ins2, 
+               family = "binomial", data = finish.data)
+summary(finish.screener)
+print("Adjusted odds ratios")
+exp(coef(finish.screener))
+print("Adjusted p-values")
+p.adjust(summary(finish.screener)$coefficients[, 4], method = "BH")
 ```
 
 
